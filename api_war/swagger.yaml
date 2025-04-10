@@ -1,0 +1,252 @@
+openapi: 3.0.0
+info:
+  title: API de Juego de Guerreros
+  version: 1.0.0
+  description: API para gestionar un juego de cartas de guerreros
+
+servers:
+  - url: http://localhost:3000/api
+    description: Servidor de desarrollo
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        user_id:
+          type: integer
+        user_user:
+          type: string
+        user_status_fk:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Warrior:
+      type: object
+      properties:
+        warrior_id:
+          type: integer
+        name:
+          type: string
+        total_power:
+          type: integer
+        total_magic:
+          type: integer
+        health:
+          type: integer
+        speed:
+          type: integer
+        intelligence:
+          type: integer
+        status:
+          type: string
+        type_id:
+          type: integer
+        race_id:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Game:
+      type: object
+      properties:
+        game_id:
+          type: integer
+        game_mode:
+          type: string
+          enum: [power, magic, combined]
+        status:
+          type: string
+          enum: [waiting, in_progress, finished]
+        winner_id:
+          type: integer
+        created_by:
+          type: integer
+        current_turn:
+          type: integer
+        round:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+paths:
+  /auth/register:
+    post:
+      summary: Registrar nuevo usuario
+      tags: [Autenticación]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_user:
+                  type: string
+                user_password:
+                  type: string
+      responses:
+        '201':
+          description: Usuario creado exitosamente
+        '400':
+          description: Datos inválidos
+
+  /auth/login:
+    post:
+      summary: Iniciar sesión
+      tags: [Autenticación]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_user:
+                  type: string
+                user_password:
+                  type: string
+      responses:
+        '200':
+          description: Login exitoso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        '401':
+          description: Credenciales inválidas
+
+  /warriors:
+    get:
+      summary: Obtener lista de guerreros
+      tags: [Guerreros]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: Número de página
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          description: Cantidad de elementos por página
+      responses:
+        '200':
+          description: Lista de guerreros
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Warrior'
+
+  /games:
+    post:
+      summary: Crear nueva partida
+      tags: [Partidas]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                game_mode:
+                  type: string
+                  enum: [power, magic, combined]
+                warriors:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        '201':
+          description: Partida creada exitosamente
+        '400':
+          description: Datos inválidos
+
+  /games/{gameId}/join:
+    post:
+      summary: Unirse a una partida
+      tags: [Partidas]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: gameId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                warriors:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        '200':
+          description: Unido exitosamente a la partida
+        '400':
+          description: Datos inválidos
+        '404':
+          description: Partida no encontrada
+
+  /stats:
+    get:
+      summary: Obtener estadísticas del jugador
+      tags: [Estadísticas]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Estadísticas del jugador
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_games:
+                    type: integer
+                  victories:
+                    type: integer
+                  defeats:
+                    type: integer
+                  draws:
+                    type: integer
+                  ranking_points:
+                    type: integer
+                  current_streak:
+                    type: integer
+                  longest_streak:
+                    type: integer 

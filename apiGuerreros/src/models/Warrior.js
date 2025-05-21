@@ -1,29 +1,52 @@
-const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../../config/database.js');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../../config/database');
 
-class Warrior extends Model {}
-
-Warrior.init({
-  warrior_id: { // Especifica la columna de clave primaria
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  name: DataTypes.STRING,
-  total_power: DataTypes.INTEGER,
-  total_magic: DataTypes.INTEGER,
-  health: DataTypes.INTEGER,
-  speed: DataTypes.INTEGER,
-  intelligence: DataTypes.INTEGER,
-  status: DataTypes.STRING,
-  warrior_type_id: DataTypes.INTEGER,
-  race_id: DataTypes.INTEGER,
+const Warrior = sequelize.define('Warrior', {
+    warrior_id: { 
+      type: DataTypes.INTEGER, 
+      primaryKey: true, 
+      autoIncrement: true 
+    },
+    player_id: { 
+      type: DataTypes.INTEGER 
+    },
+    name: { 
+      type: DataTypes.STRING(50), 
+      allowNull: false 
+    },
+    type_id: { 
+      type: DataTypes.INTEGER 
+    },
+    race_id: { 
+      type: DataTypes.INTEGER 
+    },
+    total_power: { 
+      type: DataTypes.INTEGER, 
+      allowNull: false 
+    },
+    total_magic: { 
+      type: DataTypes.INTEGER, 
+      allowNull: false 
+    },
+    health: { 
+      type: DataTypes.INTEGER, 
+      allowNull: false 
+    },
+    speed: { 
+      type: DataTypes.INTEGER, 
+      allowNull: false 
+    },
+    intelligence: { 
+      type: DataTypes.INTEGER, 
+      allowNull: false 
+    },
+    status: { 
+      type: DataTypes.STRING(20), 
+      defaultValue: 'active' 
+    }
 }, {
-  sequelize,
-  modelName: 'Warrior',
-  tableName: 'warrior', // Asegúrate de que el nombre de la tabla sea correcto
-  freezeTableName: true, // Evita que Sequelize pluralice el nombre de la tabla
-  timestamps: false, // Desactiva los timestamps automáticos
+  tableName: 'warriors',
+  timestamps: false
 });
 
 module.exports = Warrior;

@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const Player = require('../models/player');
+const Player = require('../models/Player');
 
 // Middleware para verificar token y rol admin
 function verifyAdmin(req, res, next) {

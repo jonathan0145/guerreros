@@ -1,4 +1,5 @@
 const express = require('express');
+const apiUserRoutes = require('./routes/apiUserRoutes');
 const playerRoutes = require('./routes/playerRoutes');
 const warriorRoutes = require('./routes/warriorRoutes');
 const sequelize = require('../config/database');
@@ -6,6 +7,7 @@ const sequelize = require('../config/database');
 const app = express();
 
 app.use(express.json());
+app.use('/api', apiUserRoutes);
 app.use('/api', playerRoutes);
 app.use('/api', warriorRoutes);
 

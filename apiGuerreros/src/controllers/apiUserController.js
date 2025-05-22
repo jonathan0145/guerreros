@@ -78,7 +78,6 @@ async function remove(req, res) {
 module.exports = {
   register,
   login,
-  verifyAdmin,
   create,
   getAll,
   getById,

@@ -1,4 +1,5 @@
 const Match = require('../models/Match');
+const MatchPlayer = require('../models/MatchPlayer'); // Importar el modelo MatchPlayer
 
 // Obtener todos los partidos
 async function getAllMatches(req, res) {
@@ -64,10 +65,44 @@ async function deleteMatch(req, res) {
   }
 }
 
+// Asociar un jugador a un partido
+async function addPlayerToMatch(req, res) {
+  try {
+    const { matchId, playerId } = req.body;
+    const matchPlayer = await MatchPlayer.create({ match_id: matchId, player_id: playerId });
+
+    if (matchPlayer) {
+      res.status(200).json({ message: 'Jugador agregado al partido' });
+    } else {
+      res.status(404).json({ message: 'Error al agregar jugador al partido' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// Eliminar un jugador de un partido
+async function removePlayerFromMatch(req, res) {
+  try {
+    const { matchId, playerId } = req.body;
+    const matchPlayer = await MatchPlayer.destroy({ where: { match_id: matchId, player_id: playerId } });
+
+    if (matchPlayer) {
+      res.status(200).json({ message: 'Jugador eliminado del partido' });
+    } else {
+      res.status(404).json({ message: 'Error al eliminar jugador del partido' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
 module.exports = {
   getAllMatches,
   getMatchById,
   createMatch,
   updateMatch,
-  deleteMatch
+  deleteMatch,
+  addPlayerToMatch, // Añadido aquí
+  removePlayerFromMatch // Añadido aquí
 };

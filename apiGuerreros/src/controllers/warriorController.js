@@ -1,7 +1,7 @@
 const Warrior = require('../models/Warrior');
 const Power = require('../models/Power');
 const Spell = require('../models/Spell');
-const MatchWarrior = require('../models/MatchWarrior'); // Importar el modelo MatchWarrior
+const MatchWarrior = require('../models/MatchWarrior');
 
 // Obtener todos los guerreros
 async function getAllWarriors(req, res) {
@@ -181,6 +181,6 @@ module.exports = {
   removePowerFromWarrior,
   addSpellToWarrior,
   removeSpellFromWarrior,
-  addWarriorToMatch, // Añadido aquí
-  removeWarriorFromMatch // Añadido aquí
+  addWarriorToMatch,
+  removeWarriorFromMatch
 };

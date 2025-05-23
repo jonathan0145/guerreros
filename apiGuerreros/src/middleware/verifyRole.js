@@ -10,12 +10,3 @@ function verifyRole(requiredRole) {
 }
 
 module.exports = { verifyRole };
-//* Uso del Middleware:
-
-// - Aplica el middleware a las rutas que requieren permisos específicos. Por ejemplo, para una ruta que solo los administradores pueden acceder:
-// ```javascript
-// app.get('/admin-route', verifyRole('admin'), (req, res) => {
-//   res.send('Bienvenido, administrador');
-// });
-//  ```
-// ```

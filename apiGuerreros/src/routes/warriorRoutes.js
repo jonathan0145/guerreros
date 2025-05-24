@@ -10,7 +10,8 @@ const {
   addSpellToWarrior,
   removeSpellFromWarrior,
   addWarriorToMatch,
-  removeWarriorFromMatch
+  removeWarriorFromMatch,
+  getWarriorDetails
 } = require('../controllers/warriorController');
 
 const router = express.Router();
@@ -47,5 +48,8 @@ router.post('/match/:matchId/warrior/:warriorId', addWarriorToMatch);
 
 // Ruta para eliminar un guerrero de un partido
 router.delete('/match/:matchId/warrior/:warriorId', removeWarriorFromMatch);
+
+// Ruta para obtener detalles de un guerrero por ID
+router.get('/warrior/:id', getWarriorDetails);
 
 module.exports = router;

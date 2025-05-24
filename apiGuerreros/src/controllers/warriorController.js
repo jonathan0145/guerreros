@@ -175,6 +175,26 @@ async function removeWarriorFromMatch(req, res) {
   }
 }
 
+// Obtener detalles de un guerrero por ID
+async function getWarriorDetails(req, res) {
+  try {
+    const warrior = await Warrior.findByPk(req.params.id, {
+      include: [
+        { model: Power, as: 'powers' }, // Incluir poderes asociados
+        { model: Spell, as: 'spells' }  // Incluir hechizos asociados
+      ]
+    });
+
+    if (warrior) {
+      res.json(warrior);
+    } else {
+      res.status(404).json({ message: 'Guerrero no encontrado' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
 module.exports = {
   getAllWarriors,
   getWarriorById,
@@ -186,5 +206,6 @@ module.exports = {
   addSpellToWarrior,
   removeSpellFromWarrior,
   addWarriorToMatch,
-  removeWarriorFromMatch
+  removeWarriorFromMatch,
+  getWarriorDetails
 };

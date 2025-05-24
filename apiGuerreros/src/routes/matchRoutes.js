@@ -6,7 +6,8 @@ const {
   updateMatch,
   deleteMatch,
   addPlayerToMatch,
-  removePlayerFromMatch
+  removePlayerFromMatch,
+  selectWarriorsForMatch
 } = require('../controllers/matchController');
 
 const router = express.Router();
@@ -31,5 +32,8 @@ router.post('/match/:matchId/player/:playerId', addPlayerToMatch);
 
 // Ruta para eliminar un jugador de un partido
 router.delete('/match/:matchId/player/:playerId', removePlayerFromMatch);
+
+// Ruta para seleccionar personajes para una partida
+router.post('/select-warriors', selectWarriorsForMatch);
 
 module.exports = router;

@@ -1,5 +1,8 @@
 const Match = require('../models/Match');
-const MatchPlayer = require('../models/MatchPlayer'); // Importar el modelo MatchPlayer
+const MatchPlayer = require('../models/MatchPlayer');
+
+const Warrior = require('../models/Warrior');
+const MatchWarrior = require('../models/MatchWarrior');
 
 // Obtener todos los partidos
 async function getAllMatches(req, res) {
@@ -97,12 +100,46 @@ async function removePlayerFromMatch(req, res) {
   }
 }
 
+// Seleccionar personajes para una partida
+async function selectWarriorsForMatch(req, res) {
+  try {
+    const { playerId, warriorIds, matchId } = req.body;
+
+    // Verificar que no se seleccionen más de 5 personajes
+    if (warriorIds.length > 5) {
+      return res.status(400).json({ message: 'No puedes seleccionar más de 5 personajes' });
+    }
+
+    // Verificar que los personajes pertenecen al jugador
+    const warriors = await Warrior.findAll({
+      where: {
+        warrior_id: warriorIds,
+        player_id: playerId
+      }
+    });
+
+    if (warriors.length !== warriorIds.length) {
+      return res.status(400).json({ message: 'Algunos personajes no pertenecen al jugador' });
+    }
+
+    // Asociar los personajes a la partida
+    const matchWarriors = await Promise.all(warriorIds.map(warriorId => 
+      MatchWarrior.create({ match_id: matchId, warrior_id: warriorId })
+    ));
+
+    res.status(200).json({ message: 'Personajes seleccionados para la partida', matchWarriors });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
 module.exports = {
   getAllMatches,
   getMatchById,
   createMatch,
   updateMatch,
   deleteMatch,
-  addPlayerToMatch, // Añadido aquí
-  removePlayerFromMatch // Añadido aquí
+  addPlayerToMatch,
+  removePlayerFromMatch,
+  selectWarriorsForMatch
 };

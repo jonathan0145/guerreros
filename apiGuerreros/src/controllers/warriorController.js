@@ -76,6 +76,7 @@ async function addPowerToWarrior(req, res) {
 
     if (warrior && power) {
       await warrior.addPower(power);
+      await warrior.updateTotalPower();
       res.status(200).json({ message: 'Poder agregado al guerrero' });
     } else {
       res.status(404).json({ message: 'Guerrero o poder no encontrado' });
@@ -94,6 +95,7 @@ async function removePowerFromWarrior(req, res) {
 
     if (warrior && power) {
       await warrior.removePower(power);
+      await warrior.updateTotalPower(); 
       res.status(200).json({ message: 'Poder eliminado del guerrero' });
     } else {
       res.status(404).json({ message: 'Guerrero o poder no encontrado' });
@@ -112,6 +114,7 @@ async function addSpellToWarrior(req, res) {
 
     if (warrior && spell) {
       await warrior.addSpell(spell);
+      await warrior.updateTotalMagic();
       res.status(200).json({ message: 'Hechizo agregado al guerrero' });
     } else {
       res.status(404).json({ message: 'Guerrero o hechizo no encontrado' });
@@ -130,6 +133,7 @@ async function removeSpellFromWarrior(req, res) {
 
     if (warrior && spell) {
       await warrior.removeSpell(spell);
+      await warrior.updateTotalMagic();
       res.status(200).json({ message: 'Hechizo eliminado del guerrero' });
     } else {
       res.status(404).json({ message: 'Guerrero o hechizo no encontrado' });

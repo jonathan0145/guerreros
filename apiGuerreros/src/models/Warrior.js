@@ -20,7 +20,7 @@ const Warrior = sequelize.define('Warrior', {
     race_id: { 
       type: DataTypes.INTEGER 
     },
-    total_power: { 
+    total_power: { // saber como manejar lo de poder y magia
       type: DataTypes.INTEGER, 
       allowNull: false 
     },

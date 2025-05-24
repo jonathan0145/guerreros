@@ -574,3 +574,4 @@
 - **Respuestas:**
   - `200 OK`: Tipo de guerrero eliminado exitosamente.
   - `404 Not Found`: Tipo de guerrero no encontrado.
+

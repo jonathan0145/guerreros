@@ -36,4 +36,7 @@ router.delete('/match/:matchId/player/:playerId', removePlayerFromMatch);
 // Ruta para seleccionar personajes para una partida
 router.post('/select-warriors', selectWarriorsForMatch);
 
+// Ruta para jugar una partida y determinar el ganador
+router.post('/match/:matchId/play', playMatch);
+
 module.exports = router;

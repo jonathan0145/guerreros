@@ -31,7 +31,15 @@ async function getMatchById(req, res) {
 // Crear un nuevo partido
 async function createMatch(req, res) {
   try {
-    const newMatch = await Match.create(req.body);
+    const { mode, ...otherData } = req.body;
+
+    // Verificar que el modo de juego sea válido
+    if (!['poder', 'magia', 'suma'].includes(mode)) {
+      return res.status(400).json({ message: 'Modo de juego inválido' });
+    }
+
+    // Crear la nueva partida con el modo de juego especificado
+    const newMatch = await Match.create({ mode, ...otherData });
     res.status(201).json(newMatch);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -133,6 +141,46 @@ async function selectWarriorsForMatch(req, res) {
   }
 }
 
+// Desarrollar la lógica de combate y determinar el ganador
+async function playMatch(req, res) {
+  try {
+    const { matchId } = req.params;
+    const match = await Match.findByPk(matchId, {
+      include: [
+        { model: MatchWarrior, as: 'warriors', include: [{ model: Warrior }] }
+      ]
+    });
+
+    if (!match) {
+      return res.status(404).json({ message: 'Partido no encontrado' });
+    }
+
+    // Implementar la lógica de combate basada en el modo de juego
+    let winnerId;
+    if (match.mode === 'poder') {
+      winnerId = determineWinnerByAttribute(match.warriors, 'power');
+    } else if (match.mode === 'magia') {
+      winnerId = determineWinnerByAttribute(match.warriors, 'magic');
+    } else if (match.mode === 'suma') {
+      winnerId = determineWinnerByAttribute(match.warriors, 'total');
+    }
+
+    // Actualizar el partido con el ganador
+    await match.update({ winner_id: winnerId });
+
+    res.status(200).json({ message: 'Partida jugada', winnerId });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// Función auxiliar para determinar el ganador basado en un atributo
+function determineWinnerByAttribute(warriors, attribute) {
+  return warriors.reduce((prev, current) => {
+    return (prev.Warrior[attribute] > current.Warrior[attribute]) ? prev : current;
+  }).warrior_id;
+}
+
 module.exports = {
   getAllMatches,
   getMatchById,
@@ -141,5 +189,6 @@ module.exports = {
   deleteMatch,
   addPlayerToMatch,
   removePlayerFromMatch,
-  selectWarriorsForMatch
+  selectWarriorsForMatch,
+  playMatch
 };

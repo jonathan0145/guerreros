@@ -6,22 +6,17 @@ const {
   updateRanking,
   deleteRanking
 } = require('../controllers/rankingcontroller');
+const { verifyRole } = require('../middleware/verifyRole.js');
 
 const router = express.Router();
 
-// Route to get all rankings
+// Public routes
 router.get('/rankings', getAllRankings);
-
-// Route to get a ranking by ID
 router.get('/ranking/:id', getRankingById);
 
-// Route to create a new ranking
-router.post('/ranking', createRanking);
-
-// Route to update a ranking by ID
-router.put('/ranking/:id', updateRanking);
-
-// Route to delete a ranking by ID
-router.delete('/ranking/:id', deleteRanking);
+// Routes for admin only
+router.post('/ranking', verifyRole('admin'), createRanking);
+router.put('/ranking/:id', verifyRole('admin'), updateRanking);
+router.delete('/ranking/:id', verifyRole('admin'), deleteRanking);
 
 module.exports = router;

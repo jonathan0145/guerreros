@@ -6,22 +6,17 @@ const {
   updateRace,
   deleteRace
 } = require('../controllers/raceController');
+const { verifyRole } = require('../middleware/verifyRole.js');
 
 const router = express.Router();
 
-// Ruta para obtener todas las razas
+// Public routes
 router.get('/races', getAllRaces);
-
-// Ruta para obtener una raza por ID
 router.get('/race/:id', getRaceById);
 
-// Ruta para crear una nueva raza
-router.post('/race', createRace);
-
-// Ruta para actualizar una raza por ID
-router.put('/race/:id', updateRace);
-
-// Ruta para eliminar una raza por ID
-router.delete('/race/:id', deleteRace);
+// Routes for admin only
+router.post('/race', verifyRole('admin'), createRace);
+router.put('/race/:id', verifyRole('admin'), updateRace);
+router.delete('/race/:id', verifyRole('admin'), deleteRace);
 
 module.exports = router;

@@ -13,43 +13,26 @@ const {
   removeWarriorFromMatch,
   getWarriorDetails
 } = require('../controllers/warriorController');
+const { verifyRole } = require('../middleware/verifyRole.js');
 
 const router = express.Router();
 
-// Ruta para obtener todos los guerreros
+// Public routes
 router.get('/warriors', getAllWarriors);
-
-// Ruta para obtener un guerrero por ID
 router.get('/warrior/:id', getWarriorById);
-
-// Ruta para crear un nuevo guerrero
-router.post('/warrior', createWarrior);
-
-// Ruta para actualizar un guerrero por ID
-router.put('/warrior/:id', updateWarrior);
-
-// Ruta para eliminar un guerrero por ID
-router.delete('/warrior/:id', deleteWarrior);
-
-// Ruta para asociar un poder a un guerrero
-router.post('/warrior/:warriorId/power/:powerId', addPowerToWarrior);
-
-// Ruta para eliminar un poder de un guerrero
-router.delete('/warrior/:warriorId/power/:powerId', removePowerFromWarrior);
-
-// Ruta para asociar un hechizo a un guerrero
-router.post('/warrior/:warriorId/spell/:spellId', addSpellToWarrior);
-
-// Ruta para eliminar un hechizo de un guerrero
-router.delete('/warrior/:warriorId/spell/:spellId', removeSpellFromWarrior);
-
-// Ruta para asociar un guerrero a un partido
-router.post('/match/:matchId/warrior/:warriorId', addWarriorToMatch);
-
-// Ruta para eliminar un guerrero de un partido
-router.delete('/match/:matchId/warrior/:warriorId', removeWarriorFromMatch);
-
-// Ruta para obtener detalles de un guerrero por ID
 router.get('/warrior/:id', getWarriorDetails);
+
+// Routes for admin only
+router.post('/warrior', verifyRole('admin'), createWarrior);
+router.put('/warrior/:id', verifyRole('admin'), updateWarrior);
+router.delete('/warrior/:id', verifyRole('admin'), deleteWarrior);
+
+// Routes for admin and service roles
+router.post('/warrior/:warriorId/power/:powerId', verifyRole('admin', 'service'), addPowerToWarrior);
+router.delete('/warrior/:warriorId/power/:powerId', verifyRole('admin', 'service'), removePowerFromWarrior);
+router.post('/warrior/:warriorId/spell/:spellId', verifyRole('admin', 'service'), addSpellToWarrior);
+router.delete('/warrior/:warriorId/spell/:spellId', verifyRole('admin', 'service'), removeSpellFromWarrior);
+router.post('/match/:matchId/warrior/:warriorId', verifyRole('admin', 'service'), addWarriorToMatch);
+router.delete('/match/:matchId/warrior/:warriorId', verifyRole('admin', 'service'), removeWarriorFromMatch);
 
 module.exports = router;

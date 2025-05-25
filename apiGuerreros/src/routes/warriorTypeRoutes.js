@@ -6,22 +6,17 @@ const {
   updateWarriorType,
   deleteWarriorType
 } = require('../controllers/warriorTypeController');
+const { verifyRole } = require('../middleware/verifyRole.js');
 
 const router = express.Router();
 
-// Route to get all warrior types
+// Public routes
 router.get('/warrior-types', getAllWarriorTypes);
-
-// Route to get a warrior type by ID
 router.get('/warrior-type/:id', getWarriorTypeById);
 
-// Route to create a new warrior type
-router.post('/warrior-type', createWarriorType);
-
-// Route to update a warrior type by ID
-router.put('/warrior-type/:id', updateWarriorType);
-
-// Route to delete a warrior type by ID
-router.delete('/warrior-type/:id', deleteWarriorType);
+// Routes for admin only
+router.post('/warrior-type', verifyRole('admin'), createWarriorType);
+router.put('/warrior-type/:id', verifyRole('admin'), updateWarriorType);
+router.delete('/warrior-type/:id', verifyRole('admin'), deleteWarriorType);
 
 module.exports = router;

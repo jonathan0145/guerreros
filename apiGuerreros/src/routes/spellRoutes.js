@@ -6,22 +6,17 @@ const {
   updateSpell,
   deleteSpell
 } = require('../controllers/spellController');
+const { verifyRole } = require('../middleware/verifyRole.js');
 
 const router = express.Router();
 
-// Route to get all spells
+// Public routes
 router.get('/spells', getAllSpells);
-
-// Route to get a spell by ID
 router.get('/spell/:id', getSpellById);
 
-// Route to create a new spell
-router.post('/spell', createSpell);
-
-// Route to update a spell by ID
-router.put('/spell/:id', updateSpell);
-
-// Route to delete a spell by ID
-router.delete('/spell/:id', deleteSpell);
+// Routes for admin only
+router.post('/spell', verifyRole('admin'), createSpell);
+router.put('/spell/:id', verifyRole('admin'), updateSpell);
+router.delete('/spell/:id', verifyRole('admin'), deleteSpell);
 
 module.exports = router;

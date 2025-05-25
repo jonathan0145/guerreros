@@ -7,7 +7,9 @@ const {
   deleteMatch,
   addPlayerToMatch,
   removePlayerFromMatch,
-  selectWarriorsForMatch
+  selectWarriorsForMatch,
+  playMatch,
+  finishMatch,
 } = require('../controllers/matchController');
 
 const router = express.Router();
@@ -38,5 +40,8 @@ router.post('/select-warriors', selectWarriorsForMatch);
 
 // Ruta para jugar una partida y determinar el ganador
 router.post('/match/:matchId/play', playMatch);
+
+// Ruta para finalizar una partida y registrar el resultado
+router.put('/match/:matchId/finish', finishMatch);
 
 module.exports = router;

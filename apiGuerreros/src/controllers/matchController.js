@@ -181,6 +181,26 @@ function determineWinnerByAttribute(warriors, attribute) {
   }).warrior_id;
 }
 
+// Finalizar una partida y registrar el resultado
+async function finishMatch(req, res) {
+  try {
+    const { matchId } = req.params;
+    const match = await Match.findByPk(matchId);
+
+    if (!match) {
+      return res.status(404).json({ message: 'Partido no encontrado' });
+    }
+
+    // Registrar el resultado de la partida
+    // Aquí puedes actualizar el estado del partido y registrar el ganador
+    await match.update({ status: 'finalizado' });
+
+    res.status(200).json({ message: 'Partida finalizada', match });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
 module.exports = {
   getAllMatches,
   getMatchById,
@@ -190,5 +210,6 @@ module.exports = {
   addPlayerToMatch,
   removePlayerFromMatch,
   selectWarriorsForMatch,
-  playMatch
+  playMatch,
+  finishMatch
 };

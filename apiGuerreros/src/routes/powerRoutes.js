@@ -6,22 +6,17 @@ const {
   updatePower,
   deletePower
 } = require('../controllers/powerController');
+const { verifyRole } = require('../middleware/verifyRole.js');
 
 const router = express.Router();
 
-// Ruta para obtener todos los poderes
+// Public routes
 router.get('/powers', getAllPowers);
-
-// Ruta para obtener un poder por ID
 router.get('/power/:id', getPowerById);
 
-// Ruta para crear un nuevo poder
-router.post('/power', createPower);
-
-// Ruta para actualizar un poder por ID
-router.put('/power/:id', updatePower);
-
-// Ruta para eliminar un poder por ID
-router.delete('/power/:id', deletePower);
+// Routes for admin only
+router.post('/power', verifyRole('admin'), createPower);
+router.put('/power/:id', verifyRole('admin'), updatePower);
+router.delete('/power/:id', verifyRole('admin'), deletePower);
 
 module.exports = router;

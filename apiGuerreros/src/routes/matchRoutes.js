@@ -11,37 +11,26 @@ const {
   playMatch,
   finishMatch,
 } = require('../controllers/matchController');
+const { verifyRole } = require('../middleware/verifyRole.js');
 
 const router = express.Router();
 
-// Ruta para obtener todos los partidos
+// Public routes
 router.get('/matches', getAllMatches);
-
-// Ruta para obtener un partido por ID
 router.get('/match/:id', getMatchById);
 
-// Ruta para crear un nuevo partido
-router.post('/match', createMatch);
+// Routes for admin only
+router.post('/match', verifyRole('admin'), createMatch);
+router.put('/match/:id', verifyRole('admin'), updateMatch);
+router.delete('/match/:id', verifyRole('admin'), deleteMatch);
 
-// Ruta para actualizar un partido por ID
-router.put('/match/:id', updateMatch);
+// Routes for service role
+router.post('/match/:matchId/player/:playerId', verifyRole('service'), addPlayerToMatch);
+router.delete('/match/:matchId/player/:playerId', verifyRole('service'), removePlayerFromMatch);
 
-// Ruta para eliminar un partido por ID
-router.delete('/match/:id', deleteMatch);
-
-// Ruta para asociar un jugador a un partido
-router.post('/match/:matchId/player/:playerId', addPlayerToMatch);
-
-// Ruta para eliminar un jugador de un partido
-router.delete('/match/:matchId/player/:playerId', removePlayerFromMatch);
-
-// Ruta para seleccionar personajes para una partida
-router.post('/select-warriors', selectWarriorsForMatch);
-
-// Ruta para jugar una partida y determinar el ganador
-router.post('/match/:matchId/play', playMatch);
-
-// Ruta para finalizar una partida y registrar el resultado
-router.put('/match/:matchId/finish', finishMatch);
+// Routes for combined roles (admin and service)
+router.post('/select-warriors', verifyRole('admin', 'service'), selectWarriorsForMatch);
+router.post('/match/:matchId/play', verifyRole('admin', 'service'), playMatch);
+router.put('/match/:matchId/finish', verifyRole('admin', 'service'), finishMatch);
 
 module.exports = router;

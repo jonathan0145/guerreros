@@ -15,8 +15,8 @@ router.get('/powers', getAllPowers);
 router.get('/power/:id', getPowerById);
 
 // Routes for admin only
-router.post('/power', verifyRole('admin'), createPower);
-router.put('/power/:id', verifyRole('admin'), updatePower);
+router.post('/power', verifyRole('admin', 'service'), createPower);
+router.put('/power/:id', verifyRole('admin', 'service'), updatePower);
 router.delete('/power/:id', verifyRole('admin'), deletePower);
 
 module.exports = router;

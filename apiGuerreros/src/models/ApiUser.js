@@ -19,7 +19,7 @@ const ApiUser = sequelize.define('ApiUser', {
         type: DataTypes.ENUM('admin', 'service', 'read_only'), 
         defaultValue: 'read_only' 
     },
-    pi_token: { 
+    api_token: { 
         type: DataTypes.STRING(255), 
         unique: true 
     }

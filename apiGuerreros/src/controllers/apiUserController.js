@@ -3,28 +3,61 @@ const jwt = require('jsonwebtoken');
 const ApiUser = require('../models/ApiUser');
 
 
-// Registro público (solo service y read_only)
+// // Registro público (solo service y read_only)
+// async function register(req, res) {
+//   const { username, password, role } = req.body;
+//   if (!['service', 'read_only'].includes(role)) {
+//     return res.status(400).json({ message: 'Solo se permite crear usuarios con rol service o read_only' });
+//   }
+//   const hash = await bcrypt.hash(password, 10);
+//   const user = await ApiUser.create({ username, password_hash: hash, role });
+//   res.status(201).json({ message: 'Usuario API creado', api_user_id: user.api_user_id });
+// }// quiero que el primer usuario creado sea admin
+
 async function register(req, res) {
   const { username, password, role } = req.body;
-  if (!['service', 'read_only'].includes(role)) {
+
+  // Verificar si existen usuarios
+  const userCount = await ApiUser.count();
+
+  // Si no existen usuarios, permitir el rol 'admin'; de lo contrario, restringir a 'service' o 'read_only'
+  const userRole = userCount === 0 ? 'admin' : role;
+
+  if (userCount > 0 && !['service', 'read_only'].includes(userRole)) {
     return res.status(400).json({ message: 'Solo se permite crear usuarios con rol service o read_only' });
   }
+
   const hash = await bcrypt.hash(password, 10);
-  const user = await ApiUser.create({ username, password_hash: hash, role });
+  const user = await ApiUser.create({ username, password_hash: hash, role: userRole });
   res.status(201).json({ message: 'Usuario API creado', api_user_id: user.api_user_id });
 }
 
-// Login para todos los roles
 async function login(req, res) {
-  const { username, password } = req.body;
-  const user = await ApiUser.findOne({ where: { username } });
-  if (!user) return res.status(401).json({ message: 'Credenciales inválidas' });
+  try {
+    const { username, password } = req.body;
+    const user = await ApiUser.findOne({ where: { username } });
+    if (!user) return res.status(401).json({ message: 'Credenciales inválidas' });
 
-  const valid = await bcrypt.compare(password, user.password_hash);
-  if (!valid) return res.status(401).json({ message: 'Credenciales inválidas' });
+    const valid = await bcrypt.compare(password, user.password_hash);
+    if (!valid) return res.status(401).json({ message: 'Credenciales inválidas' });
 
-  const token = jwt.sign({ api_user_id: user.api_user_id, role: user.role }, 'secreto', { expiresIn: '1h' });
-  res.json({ token, role: user.role });
+    const token = jwt.sign({ api_user_id: user.api_user_id, role: user.role }, 'secreto', { expiresIn: '1h' });
+
+    // Depuración: Registra el token antes de guardar
+    console.log('Generated token:', token);
+
+    // Actualiza el campo api_token del usuario con el token generado
+    user.api_token = token;
+    await user.save();
+
+    // Depuración: Registra el objeto usuario después de guardar
+    console.log('User after saving:', user);
+
+    res.json({ token, role: user.role });
+  } catch (error) {
+    console.error('Error durante el inicio de sesión:', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
 }
 
 // CRUD solo para admin

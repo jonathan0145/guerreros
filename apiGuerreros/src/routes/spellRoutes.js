@@ -15,8 +15,8 @@ router.get('/spells', getAllSpells);
 router.get('/spell/:id', getSpellById);
 
 // Routes for admin only
-router.post('/spell', verifyRole('admin'), createSpell);
-router.put('/spell/:id', verifyRole('admin'), updateSpell);
+router.post('/spell', verifyRole('admin', 'service'), createSpell);
+router.put('/spell/:id', verifyRole('admin','service'), updateSpell);
 router.delete('/spell/:id', verifyRole('admin'), deleteSpell);
 
 module.exports = router;

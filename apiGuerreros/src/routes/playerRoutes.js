@@ -1,23 +1,26 @@
 const express = require('express');
-const { register,
-        login,
-        adminCreate, 
-        getAll, 
-        getById, 
-        update, 
-        remove } = require('../controllers/playerController');
+const {
+    register,
+    login,
+    adminCreate, 
+    getAll, 
+    getById, 
+    update, 
+    remove 
+} = require('../controllers/playerController');
 const router = express.Router();
 const { verifyRole } = require('../middleware/verifyRole.js');
+const { verifyPlayerRole } = require('../middleware/verifyPlayerRole.js');
 
 // Public routes
-router.post('/players', register);
-router.post('/login', login);
+router.post('/registerplayer', register);
+router.post('/loginplayer', login);
 
-// Routes for admin only
-router.post('/admin/players', verifyRole('admin'), adminCreate);
-router.get('/admin/players', verifyRole('admin'), getAll);
-router.get('/admin/players/:id', verifyRole('admin'), getById);
-router.put('/admin/players/:id', verifyRole('admin'), update);
-router.delete('/admin/players/:id', verifyRole('admin'), remove);
+// Routes private
+router.post('/admin/players', verifyRole('admin', 'service'), verifyPlayerRole('admin'), adminCreate);
+router.get('/admin/players', verifyRole('admin', 'service'), verifyPlayerRole('admin'), getAll);
+router.get('/admin/players/:id', verifyRole('admin', 'service'), verifyPlayerRole('admin', 'user'), getById);
+router.put('/admin/players/:id', verifyRole('admin'), verifyPlayerRole('admin', 'user'), update);
+router.delete('/admin/players/:id', verifyRole('admin'), verifyPlayerRole('admin'), remove);
 
 module.exports = router;

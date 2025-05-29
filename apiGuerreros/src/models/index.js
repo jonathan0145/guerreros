@@ -25,12 +25,19 @@ Warrior.belongsTo(Race, { foreignKey: 'race_id' });
 Race.hasMany(Warrior, { foreignKey: 'race_id' });
 
 // Relación Warrior - Power (N:M)
-Warrior.belongsToMany(Power, { through: WarriorPower, foreignKey: 'warrior_id', otherKey: 'power_id' });
-Power.belongsToMany(Warrior, { through: WarriorPower, foreignKey: 'power_id', otherKey: 'warrior_id' });
+// Warrior.belongsToMany(Power, { through: 'WarriorPowers', foreignKey: 'warrior_id', otherKey: 'power_id' });
+// Power.belongsToMany(Warrior, { through: 'WarriorPowers', foreignKey: 'power_id', otherKey: 'warrior_id' });
+Warrior.belongsToMany(Power, { through: 'WarriorPower', as: 'powers' });
+Power.belongsToMany(Warrior, { through: 'WarriorPower', as: 'warriors' });
 
 // Relación Warrior - Spell (N:M)
-Warrior.belongsToMany(Spell, { through: WarriorSpell, foreignKey: 'warrior_id', otherKey: 'spell_id' });
-Spell.belongsToMany(Warrior, { through: WarriorSpell, foreignKey: 'spell_id', otherKey: 'warrior_id' });
+// Warrior.belongsToMany(Spell, { through: WarriorSpell, foreignKey: 'warrior_id', otherKey: 'spell_id' });
+// Spell.belongsToMany(Warrior, { through: WarriorSpell, foreignKey: 'spell_id', otherKey: 'warrior_id' });
+Warrior.belongsToMany(Spell, { through: 'WarriorSpell', as: 'spells' });
+Spell.belongsToMany(Warrior, { through: 'WarriorSpell', as: 'warriors' });
+
+// Warrior.belongsToMany(Spell, { through: WarriorSpell, foreignKey: 'warrior_id', otherKey: 'spell_id' });
+// Spell.belongsToMany(Warrior, { through: WarriorSpell, foreignKey: 'spell_id', otherKey: 'warrior_id' });
 
 // Relación Match - Player (N:M)
 Match.belongsToMany(Player, { through: MatchPlayer, foreignKey: 'match_id', otherKey: 'player_id' });

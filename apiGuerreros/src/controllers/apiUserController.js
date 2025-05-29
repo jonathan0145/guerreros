@@ -2,18 +2,6 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const ApiUser = require('../models/ApiUser');
 
-
-// // Registro público (solo service y read_only)
-// async function register(req, res) {
-//   const { username, password, role } = req.body;
-//   if (!['service', 'read_only'].includes(role)) {
-//     return res.status(400).json({ message: 'Solo se permite crear usuarios con rol service o read_only' });
-//   }
-//   const hash = await bcrypt.hash(password, 10);
-//   const user = await ApiUser.create({ username, password_hash: hash, role });
-//   res.status(201).json({ message: 'Usuario API creado', api_user_id: user.api_user_id });
-// }// quiero que el primer usuario creado sea admin
-
 async function register(req, res) {
   const { username, password, role } = req.body;
 
@@ -41,7 +29,7 @@ async function login(req, res) {
     const valid = await bcrypt.compare(password, user.password_hash);
     if (!valid) return res.status(401).json({ message: 'Credenciales inválidas' });
 
-    const token = jwt.sign({ api_user_id: user.api_user_id, role: user.role }, 'secreto', { expiresIn: '1h' });
+    const token = jwt.sign({ api_user_id: user.api_user_id, role: user.role }, 'secreto', { expiresIn: '6h' });
 
     // Depuración: Registra el token antes de guardar
     console.log('Generated token:', token);

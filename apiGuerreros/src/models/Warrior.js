@@ -2,6 +2,8 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../../config/database');
 const Power = require('./Power');
 const Spell = require('./Spell');
+const WarriorPower = require('./WarriorPower'); 
+const WarriorSpell = require('./WarriorSpell');
 
 const Warrior = sequelize.define('Warrior', {
     warrior_id: { 
@@ -53,6 +55,15 @@ const Warrior = sequelize.define('Warrior', {
   timestamps: false
 });
 
+// En Warrior.js
+Warrior.prototype.addPower = async function(power) {
+  await WarriorPower.create({ warrior_id: this.warrior_id, power_id: power.power_id });
+};
+
+Warrior.prototype.addSpell = async function(spell) {
+  await WarriorSpell.create({ warrior_id: this.warrior_id, spell_id: spell.spell_id });
+};
+
 Warrior.prototype.updateTotalPower = async function() {
   const powers = await this.getPowers(); // Obtener poderes asociados
   const totalPower = powers.reduce((sum, power) => sum + power.percentage, 0);
@@ -68,21 +79,3 @@ Warrior.prototype.updateTotalMagic = async function() {
 };
 
 module.exports = Warrior;
-
-// ### Paso 2: Llamar al Método de Actualización
-// Asegúrate de llamar a este método cada vez que se modifiquen los poderes de un guerrero. Esto se puede hacer en el controlador o servicio donde se gestionan las asociaciones de poderes.
-
-// ### Explicación
-// - Método updateTotalPower : Este método obtiene todos los poderes asociados al guerrero, suma sus percentage , y actualiza el atributo total_power .
-// - Uso del Método : Llama a updateTotalPower después de añadir o eliminar poderes de un guerrero para mantener el valor actualizado.
-// Con estos cambios, el atributo total_power reflejará correctamente la suma de los porcentajes de todos los poderes asociados a un guerrero. Si necesitas más ayuda o detalles específicos, no dudes en preguntar.
-
-// ### Paso 2: Llamar al Método de Actualización
-// Asegúrate de llamar al método updateTotalMagic cada vez que se modifiquen los hechizos de un guerrero. Esto se puede hacer en el controlador o servicio donde se gestionan las asociaciones de hechizos.
-
-// ### Explicación
-// - Método updateTotalMagic : Este método obtiene todos los hechizos asociados al guerrero, suma sus percentage , y actualiza el atributo total_magic .
-// - Uso del Método : Llama a updateTotalMagic después de añadir o eliminar hechizos de un guerrero para mantener el valor actualizado.
-// Con estos cambios, el atributo total_magic reflejará correctamente la suma de los porcentajes de todos los hechizos asociados a un guerrero. Si necesitas más ayuda o detalles específicos, no dudes en preguntar.
-
-// quiero saber como manejar eso de los poderes

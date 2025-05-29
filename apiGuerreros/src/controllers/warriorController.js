@@ -67,12 +67,37 @@ async function deleteWarrior(req, res) {
   }
 }
 
+// // Asociar un poder a un guerrero
+// async function addPowerToWarrior(req, res) {
+//   try {
+//     const { warriorId, powerId } = req.body;
+//     const warrior = await Warrior.findByPk(warriorId);
+//     const power = await Power.findByPk(powerId);
+
+//     if (warrior && power) {
+//       await warrior.addPower(power);
+//       await warrior.updateTotalPower();
+//       res.status(200).json({ message: 'Poder agregado al guerrero' });
+//     } else {
+//       res.status(404).json({ message: 'Guerrero o poder no encontrado' });
+//     }
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// }
+
 // Asociar un poder a un guerrero
 async function addPowerToWarrior(req, res) {
   try {
-    const { warriorId, powerId } = req.body;
-    const warrior = await Warrior.findByPk(warriorId);
-    const power = await Power.findByPk(powerId);
+    // CAMBIO AQUÍ: Obtener IDs de req.params
+    const { warriorId, powerId } = req.params; // <--- ¡CAMBIA DE req.body a req.params!
+
+    // Asegúrate de convertir a número si es necesario, ya que req.params son strings
+    const parsedWarriorId = parseInt(warriorId, 10);
+    const parsedPowerId = parseInt(powerId, 10);
+
+    const warrior = await Warrior.findByPk(parsedWarriorId);
+    const power = await Power.findByPk(parsedPowerId);
 
     if (warrior && power) {
       await warrior.addPower(power);
@@ -106,11 +131,32 @@ async function removePowerFromWarrior(req, res) {
 }
 
 // Asociar un hechizo a un guerrero
+// async function addSpellToWarrior(req, res) {
+//   try {
+//     const { warriorId, spellId } = req.body;
+//     const warrior = await Warrior.findByPk(warriorId);
+//     const spell = await Spell.findByPk(spellId);
+
+//     if (warrior && spell) {
+//       await warrior.addSpell(spell);
+//       await warrior.updateTotalMagic();
+//       res.status(200).json({ message: 'Hechizo agregado al guerrero' });
+//     } else {
+//       res.status(404).json({ message: 'Guerrero o hechizo no encontrado' });
+//     }
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// }
 async function addSpellToWarrior(req, res) {
   try {
-    const { warriorId, spellId } = req.body;
-    const warrior = await Warrior.findByPk(warriorId);
-    const spell = await Spell.findByPk(spellId);
+    const { warriorId, spellId } = req.params; // Cambiar de req.body a req.params
+
+    const parsedWarriorId = parseInt(warriorId, 10);
+    const parsedSpellId = parseInt(spellId, 10);
+
+    const warrior = await Warrior.findByPk(parsedWarriorId);
+    const spell = await Spell.findByPk(parsedSpellId);
 
     if (warrior && spell) {
       await warrior.addSpell(spell);

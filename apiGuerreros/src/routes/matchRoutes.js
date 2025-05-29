@@ -23,7 +23,7 @@ router.get('/match/:id', getMatchById);
 
 // Routes for admin only
 router.post('/match', verifyRole('admin'), verifyPlayerRole('admin'), createMatch);
-router.put('/match/:id', verifyRole('admin'). verifyPlayerRole('admin'), updateMatch);
+router.put('/match/:id', verifyRole('admin'), verifyPlayerRole('admin'), updateMatch);
 router.delete('/match/:id', verifyRole('admin'), verifyPlayerRole('admin'), deleteMatch);
 
 // Routes for service role

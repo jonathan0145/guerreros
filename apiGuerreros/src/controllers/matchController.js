@@ -77,18 +77,57 @@ async function deleteMatch(req, res) {
 }
 
 // Asociar un jugador a un partido
+// async function addPlayerToMatch(req, res) {
+//   try {
+//     const { matchId, playerId } = req.body;
+//     const matchPlayer = await MatchPlayer.create({ match_id: matchId, player_id: playerId });
+
+//     if (matchPlayer) {
+//       res.status(200).json({ message: 'Jugador agregado al partido' });
+//     } else {
+//       res.status(404).json({ message: 'Error al agregar jugador al partido' });
+//     }
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// }
+
+// async function addPlayerToMatch(req, res) {
+//   try {
+//     const { matchId, playerId } = req.params; // Cambiar de req.body a req.params
+
+//     const parsedMatchId = parseInt(matchId, 10);
+//     const parsedPlayerId = parseInt(playerId, 10);
+
+//     const matchPlayer = await MatchPlayer.create({ match_id: parsedMatchId, player_id: parsedPlayerId });
+
+//     if (matchPlayer) {
+//       res.status(200).json({ message: 'Jugador agregado al partido' });
+//     } else {
+//       res.status(404).json({ message: 'Error al agregar jugador al partido' });
+//     }
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// }
+
 async function addPlayerToMatch(req, res) {
   try {
-    const { matchId, playerId } = req.body;
-    const matchPlayer = await MatchPlayer.create({ match_id: matchId, player_id: playerId });
+      const { matchId, playerId } = req.params;
+      const parsedMatchId = parseInt(matchId, 10);
+      const parsedPlayerId = parseInt(playerId, 10);
 
-    if (matchPlayer) {
-      res.status(200).json({ message: 'Jugador agregado al partido' });
-    } else {
-      res.status(404).json({ message: 'Error al agregar jugador al partido' });
-    }
+      // Esta línea es la única que interactúa con la base de datos
+      // Y SOLO crea un registro en la tabla INTERMEDIA MatchPlayer.
+      const matchPlayer = await MatchPlayer.create({ match_id: parsedMatchId, player_id: parsedPlayerId });
+
+      if (matchPlayer) {
+          res.status(200).json({ message: 'Jugador agregado al partido' });
+      } else {
+          res.status(404).json({ message: 'Error al agregar jugador al partido' });
+      }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error.message });
   }
 }
 

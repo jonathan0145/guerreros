@@ -190,10 +190,29 @@ async function removeSpellFromWarrior(req, res) {
 }
 
 // Asociar un guerrero a un partido
+// async function addWarriorToMatch(req, res) {
+//   try {
+//     const { matchId, warriorId } = req.body;
+//     const matchWarrior = await MatchWarrior.create({ match_id: matchId, warrior_id: warriorId });
+
+//     if (matchWarrior) {
+//       res.status(200).json({ message: 'Guerrero agregado al partido' });
+//     } else {
+//       res.status(404).json({ message: 'Error al agregar guerrero al partido' });
+//     }
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// }
+
 async function addWarriorToMatch(req, res) {
   try {
-    const { matchId, warriorId } = req.body;
-    const matchWarrior = await MatchWarrior.create({ match_id: matchId, warrior_id: warriorId });
+    const { matchId, warriorId } = req.params; // Cambiar de req.body a req.params
+
+    const parsedMatchId = parseInt(matchId, 10);
+    const parsedWarriorId = parseInt(warriorId, 10);
+
+    const matchWarrior = await MatchWarrior.create({ match_id: parsedMatchId, warrior_id: parsedWarriorId });
 
     if (matchWarrior) {
       res.status(200).json({ message: 'Guerrero agregado al partido' });

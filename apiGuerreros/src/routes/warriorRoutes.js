@@ -20,7 +20,7 @@ const router = express.Router();
 // Public routes
 router.get('/warriors', getAllWarriors);
 router.get('/warrior/:id', getWarriorById);
-router.get('/warrior/:id', getWarriorDetails);
+router.get('/warriorpm/:id', getWarriorDetails);
 
 // Routes for admin only
 router.post('/warrior', verifyRole('admin'), createWarrior);

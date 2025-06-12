@@ -1,8 +1,8 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../../config/database');
 
-const Race = sequelize.define('Race', {
-    race_id: { 
+const WarriorType = sequelize.define('WarriorType', {
+    type_id: { 
         type: DataTypes.INTEGER, 
         primaryKey: true, 
         autoIncrement: true 
@@ -15,15 +15,8 @@ const Race = sequelize.define('Race', {
         type: DataTypes.TEXT 
     }
 }, {
-  tableName: 'races',
+  tableName: 'warrior_types',
   timestamps: false
 });
 
-// *** ¡AÑADIR ESTE MÉTODO ASSOCIATE! ***
-Race.associate = (models) => {
-    // Relación Race - Warrior (1:N)
-    // Una raza puede tener muchos guerreros de esa raza.
-    Race.hasMany(models.Warrior, { foreignKey: 'race_id' });
-};
-
-module.exports = Race;
+module.exports = WarriorType;

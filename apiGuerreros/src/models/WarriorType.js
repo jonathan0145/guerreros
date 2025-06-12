@@ -19,4 +19,11 @@ const WarriorType = sequelize.define('WarriorType', {
   timestamps: false
 });
 
+// *** ¡AÑADIR ESTE MÉTODO ASSOCIATE! ***
+WarriorType.associate = (models) => {
+    // Relación WarriorType - Warrior (1:N)
+    // Un tipo de guerrero puede tener muchos guerreros de ese tipo.
+    WarriorType.hasMany(models.Warrior, { foreignKey: 'type_id' });
+};
+
 module.exports = WarriorType;

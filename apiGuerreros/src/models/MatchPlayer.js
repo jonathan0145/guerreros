@@ -1,28 +1,26 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../../config/database');
 
-const Match = sequelize.define('Match', {
+const MatchPlayer = sequelize.define('MatchPlayer', {
     match_id: { 
         type: DataTypes.INTEGER, 
         primaryKey: true, 
-        autoIncrement: true 
+         references: { model: 'matches', key: 'match_id' }
     },
-    mode: { 
-        type: DataTypes.STRING(20), 
-        allowNull: false 
-    },
-    winner_id: { 
-        type: DataTypes.INTEGER 
-    },
-    created_at: { 
-        type: DataTypes.DATE, 
-        defaultValue: DataTypes.NOW },
-    finished_at: { 
-        type: DataTypes.DATE 
+    player_id: { 
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        references: { model: 'players', key: 'player_id' }
     }
 }, {
-  tableName: 'matches',
+  tableName: 'match_players',
   timestamps: false
 });
 
-module.exports = Match;
+// *** ¡AÑADIR ESTE MÉTODO ASSOCIATE! ***
+MatchPlayer.associate = (models) => {
+    MatchPlayer.belongsTo(models.Match, { foreignKey: 'match_id' });
+    MatchPlayer.belongsTo(models.Player, { foreignKey: 'player_id' });
+};
+
+module.exports = MatchPlayer;

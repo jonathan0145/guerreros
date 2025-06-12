@@ -20,7 +20,7 @@ const Warrior = sequelize.define('Warrior', {
     race_id: { 
       type: DataTypes.INTEGER 
     },
-    total_power: {
+    total_power: { // saber como manejar lo de poder y magia
       type: DataTypes.INTEGER, 
       allowNull: false,
       defaultValue: 0
@@ -51,12 +51,13 @@ const Warrior = sequelize.define('Warrior', {
   timestamps: false
 });
 
-// *** ASOCIACIONES DEFINIDAS CORRECTAMENTE DENTRO DE ASSOCIATE ***
+// *********** ¡AQUÍ ES DONDE VAN LAS ASOCIACIONES! ***********
 Warrior.associate = (models) => {
     // Relación Warrior - Power (N:M)
+    // 'models.Power' y 'models.WarriorPower' son pasados por el index.js central
     Warrior.belongsToMany(models.Power, { through: models.WarriorPower, as: 'powers', foreignKey: 'warrior_id' });
 
-    // Relación Warrior - Spell (N:M) - Esto genera this.addSpell(), this.getSpells(), etc.
+    // Relación Warrior - Spell (N:M)
     Warrior.belongsToMany(models.Spell, { through: models.WarriorSpell, as: 'spells', foreignKey: 'warrior_id' });
 
     // Otras asociaciones de Warrior
@@ -66,17 +67,24 @@ Warrior.associate = (models) => {
     Warrior.belongsToMany(models.Match, { through: models.MatchWarrior, foreignKey: 'warrior_id', otherKey: 'match_id' });
 };
 
-// Tus métodos de prototipo (updateTotalPower, updateTotalMagic) están bien aquí.
-// Dependen de que .getPowers() y .getSpells() sean inyectados por Sequelize.
+// // En Warrior.js
+// Warrior.prototype.addPower = async function(power) {
+//   await WarriorPower.create({ warrior_id: this.warrior_id, power_id: power.power_id });
+// };
+
+// Warrior.prototype.addSpell = async function(spell) {
+//   await WarriorSpell.create({ warrior_id: this.warrior_id, spell_id: spell.spell_id });
+// };
+
 Warrior.prototype.updateTotalPower = async function() {
-  const powers = await this.getPowers(); // Esto ahora funcionará
+  const powers = await this.getPowers(); // Obtener poderes asociados
   const totalPower = powers.reduce((sum, power) => sum + power.percentage, 0);
   this.total_power = totalPower;
   await this.save();
 };
 
 Warrior.prototype.updateTotalMagic = async function() {
-  const spells = await this.getSpells(); // Esto ahora funcionará
+  const spells = await this.getSpells(); // Obtener hechizos asociados
   const totalMagic = spells.reduce((sum, spell) => sum + spell.percentage, 0);
   this.total_magic = totalMagic;
   await this.save();

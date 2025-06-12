@@ -23,4 +23,10 @@ const Spell = sequelize.define('Spell', {
   timestamps: false
 });
 
+// *** AÑADIR MÉTODO ASSOCIATE ***
+Spell.associate = (models) => {
+    // Relación Spell - Warrior (N:M)
+    Spell.belongsToMany(models.Warrior, { through: models.WarriorSpell, as: 'warriors', foreignKey: 'spell_id' });
+};
+
 module.exports = Spell;

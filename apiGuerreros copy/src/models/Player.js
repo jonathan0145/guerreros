@@ -26,19 +26,4 @@ const Player = sequelize.define('Player', {
   timestamps: false
 });
 
-// *** ¡AÑADIR ESTE MÉTODO ASSOCIATE! ***
-Player.associate = (models) => {
-    // Relación Player - Warrior (1:N)
-    Player.hasMany(models.Warrior, { foreignKey: 'player_id' });
-
-    // Relación Player - Match (N:M)
-    Player.belongsToMany(models.Match, { through: models.MatchPlayer, foreignKey: 'player_id', otherKey: 'match_id' });
-
-    // Relación Player - PlayerStat (1:1)
-    Player.hasOne(models.PlayerStat, { foreignKey: 'player_id' });
-
-    // Relación Player - Ranking (1:1)
-    Player.hasOne(models.Ranking, { foreignKey: 'player_id' });
-};
-
 module.exports = Player;

@@ -19,11 +19,4 @@ const Race = sequelize.define('Race', {
   timestamps: false
 });
 
-// *** ¡AÑADIR ESTE MÉTODO ASSOCIATE! ***
-Race.associate = (models) => {
-    // Relación Race - Warrior (1:N)
-    // Una raza puede tener muchos guerreros de esa raza.
-    Race.hasMany(models.Warrior, { foreignKey: 'race_id' });
-};
-
 module.exports = Race;

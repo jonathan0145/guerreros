@@ -1,8 +1,10 @@
-const Match = require('../models/Match');
-const MatchPlayer = require('../models/MatchPlayer');
+const db = require('../models'); // Importa el objeto 'db' de src/models/index.js
 
-const Warrior = require('../models/Warrior');
-const MatchWarrior = require('../models/MatchWarrior');
+const Match = db.Match; // Accede al modelo Match a través del objeto db
+const MatchPlayer = db.MatchPlayer; // Accede al modelo MatchPlayer a través del objeto db
+
+const Warrior = db.Warrior; // Accede al modelo Warrior a través del objeto db
+const MatchWarrior = db.MatchWarrior; // Accede al modelo MatchWarrior a través del objeto db
 
 // Obtener todos los partidos
 async function getAllMatches(req, res) {

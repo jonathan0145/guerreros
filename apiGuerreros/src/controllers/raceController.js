@@ -1,4 +1,7 @@
-const Race = require('../models/Race');
+const db = require('../models'); // Importa el objeto 'db' de src/models/index.js
+
+const Race = db.Race; // Accede al modelo ApiUser a través del objeto db
+
 
 // Obtener todas las razas
 async function getAllRaces(req, res) {

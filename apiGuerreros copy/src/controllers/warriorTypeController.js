@@ -1,4 +1,7 @@
-const WarriorType = require('../models/WarriorType');
+const db = require('../models'); // Importa el objeto 'db' de src/models/index.js
+
+const WarriorType = db.WarriorType; // Accede al modelo ApiUser a través del objeto db
+
 
 // Obtener todos los tipos de guerreros
 async function getAllWarriorTypes(req, res) {

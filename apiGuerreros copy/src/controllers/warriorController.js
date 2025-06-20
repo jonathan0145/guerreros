@@ -1,7 +1,12 @@
-const Warrior = require('../models/Warrior');
-const Power = require('../models/Power');
-const Spell = require('../models/Spell');
-const MatchWarrior = require('../models/MatchWarrior');
+// Importa el objeto 'db' que contiene todos tus modelos asociados
+const db = require('../models'); // Asumiendo que tu index.js está en '../models/index.js'
+
+
+
+const Warrior = db.Warrior;
+const Power = db.Power;
+const Spell = db.Spell;
+const MatchWarrior = db.MatchWarrior;
 
 // Obtener todos los guerreros
 async function getAllWarriors(req, res) {
@@ -66,25 +71,6 @@ async function deleteWarrior(req, res) {
     res.status(500).json({ error: error.message });
   }
 }
-
-// // Asociar un poder a un guerrero
-// async function addPowerToWarrior(req, res) {
-//   try {
-//     const { warriorId, powerId } = req.body;
-//     const warrior = await Warrior.findByPk(warriorId);
-//     const power = await Power.findByPk(powerId);
-
-//     if (warrior && power) {
-//       await warrior.addPower(power);
-//       await warrior.updateTotalPower();
-//       res.status(200).json({ message: 'Poder agregado al guerrero' });
-//     } else {
-//       res.status(404).json({ message: 'Guerrero o poder no encontrado' });
-//     }
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// }
 
 // Asociar un poder a un guerrero
 async function addPowerToWarrior(req, res) {

@@ -1,4 +1,6 @@
-const Power = require('../models/Power');
+const db = require('../models'); // Importa el objeto 'db' de src/models/index.js
+
+const Power = db.Power; // Accede al modelo ApiUser a través del objeto db
 
 // Obtener todos los poderes
 async function getAllPowers(req, res) {

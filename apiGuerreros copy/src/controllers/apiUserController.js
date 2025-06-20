@@ -1,6 +1,8 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const ApiUser = require('../models/ApiUser');
+const db = require('../models'); // Importa el objeto 'db' de src/models/index.js
+
+const ApiUser = db.ApiUser; // Accede al modelo ApiUser a través del objeto db
 
 async function register(req, res) {
   const { username, password, role } = req.body;

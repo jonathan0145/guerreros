@@ -1,4 +1,7 @@
-const PlayerStat = require('../models/PlayerStat');
+const db = require('../models'); // Importa el objeto 'db' de src/models/index.js
+
+const PlayerStat = db.PlayerStat; // Accede al modelo ApiUser a través del objeto db
+
 
 // Obtener estadísticas de todos los jugadores
 async function getAllPlayerStats(req, res) {

@@ -1,65 +1,37 @@
-const Player = require('./Player');
-const Warrior = require('./Warrior');
-const WarriorType = require('./WarriorType');
-const Race = require('./Race');
-const Power = require('./Power');
-const Spell = require('./Spell');
-const WarriorPower = require('./WarriorPower');
-const WarriorSpell = require('./WarriorSpell');
-const Match = require('./Match');
-const MatchPlayer = require('./MatchPlayer');
-const MatchWarrior = require('./MatchWarrior');
-const PlayerStat = require('./PlayerStat');
-const Ranking = require('./Ranking');
+const fs = require('fs');
+const path = require('path');
+const Sequelize = require('sequelize'); // Solo necesitamos Sequelize para DataTypes, no para crear una instancia
+const basename = path.basename(__filename);
+const db = {};
 
-// Relación Player - Warrior (1:N)
-Player.hasMany(Warrior, { foreignKey: 'player_id' });
-Warrior.belongsTo(Player, { foreignKey: 'player_id' });
+// *** IMPORTANTE: Importa directamente la instancia de Sequelize ya configurada ***
+const sequelize = require('../../config/database'); // Esto carga la instancia 'sequelize' directamente
 
-// Relación Warrior - WarriorType (N:1)
-Warrior.belongsTo(WarriorType, { foreignKey: 'type_id' });
-WarriorType.hasMany(Warrior, { foreignKey: 'type_id' });
+// *** PASO 1: CARGAR TODOS LOS MODELOS ***
+fs
+  .readdirSync(__dirname)
+  .filter(file => {
+    return (
+      file.indexOf('.') !== 0 &&
+      file !== basename &&
+      file.slice(-3) === '.js' &&
+      file.indexOf('.test.js') === -1
+    );
+  })
+  .forEach(file => {
+    const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes);
+    db[model.name] = model;
+  });
 
-// Relación Warrior - Race (N:1)
-Warrior.belongsTo(Race, { foreignKey: 'race_id' });
-Race.hasMany(Warrior, { foreignKey: 'race_id' });
+// *** PASO 2: INICIALIZAR LAS ASOCIACIONES ***
+Object.keys(db).forEach(modelName => {
+  if (db[modelName].associate) {
+    db[modelName].associate(db);
+  }
+});
 
-// Relación Warrior - Power (N:M)
-Warrior.belongsToMany(Power, { through: 'WarriorPower', as: 'powers' });
-Power.belongsToMany(Warrior, { through: 'WarriorPower', as: 'warriors' });
+// Añadir las instancias de sequelize al objeto db
+db.sequelize = sequelize;
+db.Sequelize = Sequelize;
 
-// Relación Warrior - Spell (N:M)
-Warrior.belongsToMany(Spell, { through: 'WarriorSpell', as: 'spells' });
-Spell.belongsToMany(Warrior, { through: 'WarriorSpell', as: 'warriors' });
-
-// Relación Match - Player (N:M)
-Match.belongsToMany(Player, { through: MatchPlayer, foreignKey: 'match_id', otherKey: 'player_id' });
-Player.belongsToMany(Match, { through: MatchPlayer, foreignKey: 'player_id', otherKey: 'match_id' });
-
-// Relación Match - Warrior (N:M)
-Match.belongsToMany(Warrior, { through: MatchWarrior, foreignKey: 'match_id', otherKey: 'warrior_id', as:'warriorsInMatch' });
-Warrior.belongsToMany(Match, { through: MatchWarrior, foreignKey: 'warrior_id', otherKey: 'match_id' });
-
-// Relación Player - PlayerStat (1:1)
-Player.hasOne(PlayerStat, { foreignKey: 'player_id' });
-PlayerStat.belongsTo(Player, { foreignKey: 'player_id' });
-
-// Relación Player - Ranking (1:1)
-Player.hasOne(Ranking, { foreignKey: 'player_id' });
-Ranking.belongsTo(Player, { foreignKey: 'player_id' });
-
-module.exports = {
-  Player,
-  Warrior,
-  WarriorType,
-  Race,
-  Power,
-  Spell,
-  WarriorPower,
-  WarriorSpell,
-  Match,
-  MatchPlayer,
-  MatchWarrior,
-  PlayerStat,
-  Ranking
-};
+module.exports = db;

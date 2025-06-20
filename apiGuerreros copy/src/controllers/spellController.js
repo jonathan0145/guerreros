@@ -1,4 +1,7 @@
-const Spell = require('../models/Spell');
+// const Spell = require('../models/Spell');
+const db = require('../models'); // Importa el objeto 'db' de src/models/index.js
+
+const Spell = db.Spell; // Accede al modelo Spell a través del objeto db
 
 // Obtener todos los hechizos
 async function getAllSpells(req, res) {

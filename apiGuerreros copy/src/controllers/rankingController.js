@@ -1,4 +1,6 @@
-const Ranking = require('../models/Ranking');
+const db = require('../models'); // Importa el objeto 'db' de src/models/index.js
+
+const Ranking = db.Ranking; // Accede al modelo ApiUser a través del objeto db
 
 // Obtener el ranking de todos los jugadores
 async function getAllRankings(req, res) {

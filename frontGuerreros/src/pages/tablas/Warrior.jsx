@@ -7,11 +7,29 @@ const Warrior = () => {
     const propertiesData = [
         {
             warrior_id: 1,
+            player_id: 1,
             name: "Guerrero uno",
+            type_id: 1,
+            race_id: 1,
+            total_power: 100,
+            total_magic: 100,
+            health: 100,
+            speed: 100,
+            intelligence: 100,
+            status: "active",
         },
         {
             warrior_id: 2,
+            player_id: 2,
             name: "Guerrero dos",
+            type_id: 2,
+            race_id: 2,
+            total_power: 200,
+            total_magic: 200,
+            health: 200,
+            speed: 200,
+            intelligence: 200,
+            status: "inactive",
         },
         // ... más datos de jugadores
     ];
@@ -32,7 +50,16 @@ const Warrior = () => {
     // Cabeceras para la tabla de jugadores
     const playerHeaders = [
         { key: 'warrior_id', label: 'ID WARRIOR' },
+        { key: 'player_id', label: 'ID PLAYER' },
         { key: 'name', label: 'NAME' },
+        { key: 'type_id', label: 'ID TYPE' },
+        { key: 'race_id', label: 'ID RACE' },
+        { key: 'total_power', label: 'TOTAL POWER' },
+        { key: 'total_magic', label: 'TOTAL MAGIC' },
+        { key: 'health', label: 'HEALTH' },
+        { key: 'speed', label: 'SPEED' },
+        { key: 'intelligence', label: 'INTELLIGENCE' },
+        { key: 'status', label: 'STATUS' },
         {
             key: 'acciones',
             label: 'ACCIONES',

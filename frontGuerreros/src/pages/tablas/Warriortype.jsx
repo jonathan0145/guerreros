@@ -7,11 +7,13 @@ const Warriortype = () => {
     const propertiesData = [
         {
             type_id: 1,
-            name: "Espadachin"
+            name: "Espadachin",
+            description: "Un guerrero experto en el uso de espadas, ágil y letal en combate cuerpo a cuerpo. Su habilidad con la espada le permite realizar ataques rápidos y precisos, dominando el arte del combate con filo."
         },
         {
             type_id: 2,
-            name: "Arquero"
+            name: "Arquero",
+            description: "Un maestro del arco y las flechas, capaz de atacar a sus enemigos desde la distancia con una puntería excepcional. Su agilidad y precisión le permiten moverse rápidamente por el campo de batalla, evitando ataques mientras dispara con eficacia."
         },
         // ... más datos de jugadores
     ];
@@ -33,6 +35,7 @@ const Warriortype = () => {
     const playerHeaders = [
         { key: 'type_id', label: 'ID TYPE' },
         { key: 'name', label: 'NAME' },
+        { key: 'description', label: 'DESCRIPTION' },
         {
             key: 'acciones',
             label: 'ACCIONES',

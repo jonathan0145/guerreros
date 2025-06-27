@@ -8,11 +8,13 @@ const Race = () => {
     const propertiesData = [
         {
             race_id: 1,
-            name: "HUMANO"
+            name: "HUMANO",
+            description: "Los humanos son una raza versátil y adaptable, capaces de prosperar en una variedad de entornos. Su ingenio y determinación les permiten superar desafíos que otras razas podrían considerar insuperables.",
         },
         {
             race_id: 2,
-            name: "ELFO"
+            name: "ELFO",
+            description: "Los elfos son conocidos por su gracia y longevidad. Viven en armonía con la naturaleza y poseen habilidades mágicas innatas, lo que los convierte en poderosos aliados en la batalla.",
         },
         // ... más datos de jugadores
     ];
@@ -34,6 +36,7 @@ const Race = () => {
     const playerHeaders = [
         { key: 'race_id', label: 'ID RACE' },
         { key: 'name', label: 'NAME' },
+        { key: 'description', label: 'DESCRIPTION' },
         {
             key: 'acciones',
             label: 'ACCIONES',

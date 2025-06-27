@@ -8,11 +8,13 @@ const Power = () => {
         {
             spell_id: 1,
             name: "FUEGO",
+            description: "es algo que quema y da calor  y luz   pero debe tener muchas letras para que sea un poder importante y poderoso y que se pueda usar en muchas situaciones diferentes es algo que quema y da calor  y luz   pero debe tener muchas letras para que sea un poder importante y poderoso y que se pueda usar en muchas situaciones diferentes es algo que quema y da calor  y luz   pero debe tener muchas letras para que sea un poder importante y poderoso y que se pueda usar en muchas situaciones diferentes",
             percentage: "80"
         },
         {
             spell_id: 2,
             name: "Hielo",
+            description: "Hielo que congela y enfría todo a su alrededor, útil para detener enemigos o crear barreras",
             percentage: "90"
         },
         // ... más datos de jugadores
@@ -35,6 +37,7 @@ const Power = () => {
     const playerHeaders = [
         { key: 'spell_id', label: 'ID POWER' },
         { key: 'name', label: 'NAME' },
+        { key: 'description', label: 'DESCRIPTION' },
         { key: 'percentage', label: 'PERCENTAGE' },
         {
             key: 'acciones',

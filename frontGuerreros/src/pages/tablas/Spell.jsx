@@ -8,11 +8,13 @@ const Spell = () => {
         {
             spell_id: 1,
             name: "Bola de fuego",
+            description: "Bola de fuego es algo que quema y da calor  y luz   pero debe tener muchas letras para que sea un poder importante y poderoso y que se pueda usar en muchas situaciones diferentes es algo que quema y da calor  y luz   pero debe tener muchas letras para que sea un poder importante y poderoso y que se pueda usar en muchas situaciones diferentes es algo que quema y da calor  y luz   pero debe tener muchas letras para que sea un poder importante y poderoso y que se pueda usar en muchas situaciones diferentes",
             percentage: "80"
         },
         {
             spell_id: 2,
             name: "Bola de hielo",
+            description: "Bola de hielo",
             percentage: "90"
         },
         // ... más datos de jugadores
@@ -35,6 +37,7 @@ const Spell = () => {
     const playerHeaders = [
         { key: 'spell_id', label: 'ID SPELL' },
         { key: 'name', label: 'NAME' },
+        { key: 'description', label: 'DESCRIPTION' },
         { key: 'percentage', label: 'PERCENTAGE' },
         {
             key: 'acciones',

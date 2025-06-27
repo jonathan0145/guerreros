@@ -7,11 +7,17 @@ const MyDashboardPage = () => {
     const propertiesData = [
         {
             match_id: 1,
-            mode: "PODER"
+            mode: "PODER",
+            winner_id: 123,
+            create_at: "2023-10-01T12:00:00Z",
+            finished_at: "2023-10-01T14:00:00Z"
         },
         {
             match_id: 2,
-            mode: "HECHIZO"
+            mode: "HECHIZO",
+            winner_id: 456,
+            create_at: "2023-10-02T12:00:00Z",
+            finished_at: "2023-10-02T14:00:00Z"
         },
         // ... más datos de jugadores
     ];
@@ -33,6 +39,9 @@ const MyDashboardPage = () => {
     const playerHeaders = [
         { key: 'match_id', label: 'ID MATCH' },
         { key: 'mode', label: 'MODE' },
+        { key: 'winner_id', label: 'WINNER' },
+        { key: 'create_at', label: 'CREATED' },
+        { key: 'finished_at', label: 'FINISHED' },
         {
             key: 'acciones',
             label: 'ACCIONES',

@@ -7,12 +7,14 @@ const Player = () => {
         {
             player_id: 1,
             username: "jonathan01",
+            password_hash: "jonathan01",
             role: "admin",
             // Ya no necesitas la propiedad 'acciones' aquí, la generaremos dinámicamente
         },
         {
             player_id: 2,
             username: "jonathan02",
+            password_hash: "jonathan02",
             role: "user",
             // Ya no necesitas la propiedad 'acciones' aquí
         },
@@ -36,6 +38,7 @@ const Player = () => {
     const playerHeaders = [
         { key: 'player_id', label: 'ID PLAYER' },
         { key: 'username', label: 'USER NAME' },
+        { key: 'password_hash', label: 'PASSWORD' },
         { key: 'role', label: 'ROLE' },
         {
             key: 'acciones',

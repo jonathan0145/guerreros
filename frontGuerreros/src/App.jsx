@@ -3,18 +3,16 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-// import DashboardPage from './pages/tablas/Match';
 import AdminLayout from './components/admin/AdminLayout';
-import AdminProperties from './components/admin/AdminProperties';
 import './App.css';
 
 // Importar las páginas de las tablas
-import Match from './pages/tablas/Match';
+import Match from './pages/tablas/match';
 import Warrior from './pages/tablas/Warrior';
 import WarriorPower from './pages/tablas/WarriorPower';
 import WarriorSpell from './pages/tablas/WarriorSpell';
 import Player from './pages/tablas/Player';
-import PlayerStat from './pages/tablas/PlayerStat';
+import PlayerStat from './pages/tablas/Playerstat';
 import Power from './pages/tablas/Power';
 import Spell from './pages/tablas/Spell';
 import MatchPlayer from './pages/tablas/MatchPlayer';

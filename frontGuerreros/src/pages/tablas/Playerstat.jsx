@@ -1,39 +1,62 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import RecentPropertiesList from '../../components/admin/RecentPropertiesList';
-import { Button } from 'react-bootstrap'; // Importa Button para los botones de acción
-
+import { Button, Modal, Form } from 'react-bootstrap';
+import * as playerstatService from '../../services/playerstatService';
 
 const Playerstat = () => {
-    const propertiesData = [
-        {
-            player_id: 1,
-            games_played: 1,
-            victories: 1,
-            defeats: 1,
-        },
-        {
-            player_id: 2,
-            games_played: 2,
-            victories: 2,
-            defeats: 2,
-        },
-        // ... más datos de jugadores
-    ];
+    const [propertiesData, setPropertiesData] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [newStat, setNewStat] = useState({ player_id: '', games_played: '', victories: '', defeats: '' });
 
-    // Función para manejar las acciones (crear, actualizar, eliminar)
-    const handlePlayerAction = (actionType, playerId) => {
-        console.log(`Acción: ${actionType} para el jugador ID: ${playerId}`);
-        // Aquí iría la lógica real para interactuar con la API
-        // Por ejemplo:
-        // if (actionType === 'delete') {
-        //     axios.delete(`/api/players/${playerId}`)
-        //         .then(() => { /* actualizar lista */ })
-        //         .catch(error => { /* manejar error */ });
-        // }
-        // etc.
+    useEffect(() => {
+        fetchPlayerStats();
+    }, []);
+
+    const fetchPlayerStats = () => {
+        const token = localStorage.getItem('token');
+        const config = { headers: { Authorization: `Bearer ${token}` } };
+        playerstatService.getAllPlayerStats(config)
+            .then(res => setPropertiesData(res.data))
+            .catch(err => console.error('Error al obtener estadísticas:', err));
     };
 
-    // Cabeceras para la tabla de jugadores
+    const handlePlayerAction = (actionType, data) => {
+        const token = localStorage.getItem('token');
+        const config = { headers: { Authorization: `Bearer ${token}` } };
+        if (actionType === 'create') {
+            setShowModal(true);
+        }
+        if (actionType === 'update') {
+            playerstatService.updatePlayerStat(data.player_id, data, config)
+                .then(fetchPlayerStats)
+                .catch(() => alert('Error al actualizar estadística'));
+        }
+        if (actionType === 'delete') {
+            playerstatService.deletePlayerStat(data.player_id, config)
+                .then(fetchPlayerStats)
+                .catch(() => alert('Error al eliminar estadística'));
+        }
+    };
+
+    const handleModalClose = () => {
+        setShowModal(false);
+        setNewStat({ player_id: '', games_played: '', victories: '', defeats: '' });
+    };
+
+    const handleModalSave = () => {
+        const token = localStorage.getItem('token');
+        const config = { headers: { Authorization: `Bearer ${token}` } };
+        playerstatService.createPlayerStat(newStat, config)
+            .then(() => {
+                fetchPlayerStats();
+                handleModalClose();
+            })
+            .catch((err) => {
+                console.error('Error al crear estadística:', err.response ? err.response.data : err.message);
+                alert('Error al crear estadística');
+            });
+    };
+
     const playerHeaders = [
         { key: 'player_id', label: 'ID PLAYER' },
         { key: 'games_played', label: 'PARTIDAS JUGADAS' },
@@ -42,32 +65,16 @@ const Playerstat = () => {
         {
             key: 'acciones',
             label: 'ACCIONES',
-            // La función render recibe la fila completa (rowItem)
             render: (rowItem, handleShowUpdateModal, handleDelete, handleShowCreateModal, handleShowViewModal) => (
                 <div>
-                    {/* Botón para Crear (ejemplo, podría estar fuera de la tabla si es para toda la entidad) */}
-                    {/* Si el botón de crear es para toda la entidad (no para una fila específica),
-                        podrías ponerlo fuera de la tabla, por ejemplo, encima de ella.
-                        Lo dejo aquí como ejemplo de cómo podrías pasar handleShowCreateModal
-                        si tuvieras un botón de "Crear" por fila, lo cual es menos común.
-                        Para crear un nuevo jugador, normalmente tendrías un botón "Añadir Jugador"
-                        fuera de la tabla, que abre el modal de creación.
-                    */}
-                    {/* <Button variant="primary" size="sm" className="me-2" onClick={handleShowCreateModal}>
-                        Crear
-                    </Button> */}
-
-                    {/* Botón para Ver */}
                     <Button
-                        variant="primary" // O el color que prefieras (secondary, outline-primary, etc.)
+                        variant="primary"
                         size="sm"
                         className="me-2"
-                        onClick={() => handleShowViewModal(rowItem)} // Llama a la nueva función
-                        >
+                        onClick={() => handleShowViewModal(rowItem)}
+                    >
                         Ver
                     </Button>
-
-                    {/* Botón para Actualizar (abre el modal de actualización con los datos de la fila) */}
                     <Button
                         variant="info"
                         size="sm"
@@ -76,12 +83,10 @@ const Playerstat = () => {
                     >
                         Actualizar
                     </Button>
-
-                    {/* Botón para Eliminar (llama directamente a la función de eliminación) */}
                     <Button
                         variant="danger"
                         size="sm"
-                        onClick={() => handleDelete(rowItem.player_id)}
+                        onClick={() => handleDelete(rowItem)}
                     >
                         Eliminar
                     </Button>
@@ -93,15 +98,68 @@ const Playerstat = () => {
     return (
         <div>
             <h2 className="mb-4">Player Stat</h2>
-            {/* Botón para crear un nuevo jugador (generalmente va fuera de la tabla) */}
             <Button variant="success" className="mb-3" onClick={() => handlePlayerAction('create', null)}>
-                Añadir Nuevas estadisticas
+                Añadir Nuevas Estadísticas
             </Button>
             <RecentPropertiesList
                 headers={playerHeaders}
                 data={propertiesData}
-                onAction={handlePlayerAction} // Pasa la función para manejar acciones
+                onAction={handlePlayerAction}
             />
+
+            <Modal show={showModal} onHide={handleModalClose}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Crear Nueva Estadística</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group>
+                            <Form.Label>ID Player</Form.Label>
+                            <Form.Control
+                                type="number"
+                                value={newStat.player_id}
+                                onChange={e => setNewStat({ ...newStat, player_id: e.target.value })}
+                                placeholder="ID del jugador"
+                            />
+                        </Form.Group>
+                        <Form.Group className="mt-2">
+                            <Form.Label>Partidas Jugadas</Form.Label>
+                            <Form.Control
+                                type="number"
+                                value={newStat.games_played}
+                                onChange={e => setNewStat({ ...newStat, games_played: e.target.value })}
+                                placeholder="Partidas jugadas"
+                            />
+                        </Form.Group>
+                        <Form.Group className="mt-2">
+                            <Form.Label>Victorias</Form.Label>
+                            <Form.Control
+                                type="number"
+                                value={newStat.victories}
+                                onChange={e => setNewStat({ ...newStat, victories: e.target.value })}
+                                placeholder="Victorias"
+                            />
+                        </Form.Group>
+                        <Form.Group className="mt-2">
+                            <Form.Label>Perdidas</Form.Label>
+                            <Form.Control
+                                type="number"
+                                value={newStat.defeats}
+                                onChange={e => setNewStat({ ...newStat, defeats: e.target.value })}
+                                placeholder="Perdidas"
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleModalClose}>
+                        Cancelar
+                    </Button>
+                    <Button variant="primary" onClick={handleModalSave}>
+                        Crear
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };

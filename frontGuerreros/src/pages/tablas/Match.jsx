@@ -1,91 +1,107 @@
-import React from 'react';
-import RecentPropertiesList from '../../components/admin/RecentPropertiesList'; // Asegúrate de la ruta correcta
-import { Button } from 'react-bootstrap'; // Importa Button para los botones de acción
+import React, { useEffect, useState } from 'react';
+import RecentPropertiesList from '../../components/admin/RecentPropertiesList';
+import { Button, Modal, Form } from 'react-bootstrap';
+import * as matchService from '../../services/matchService';
 
+const Match = () => {
+    const [propertiesData, setPropertiesData] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [newMatch, setNewMatch] = useState({ mode: '' });
 
-const MyDashboardPage = () => {
-    const propertiesData = [
-        {
-            match_id: 1,
-            mode: "PODER",
-            winner_id: 123,
-            create_at: "2023-10-01T12:00:00Z",
-            finished_at: "2023-10-01T14:00:00Z"
-        },
-        {
-            match_id: 2,
-            mode: "HECHIZO",
-            winner_id: 456,
-            create_at: "2023-10-02T12:00:00Z",
-            finished_at: "2023-10-02T14:00:00Z"
-        },
-        // ... más datos de jugadores
-    ];
+    useEffect(() => {
+        fetchMatches();
+    }, []);
 
-    // Función para manejar las acciones (crear, actualizar, eliminar)
-    const handlePlayerAction = (actionType, playerId) => {
-        console.log(`Acción: ${actionType} para el jugador ID: ${playerId}`);
-        // Aquí iría la lógica real para interactuar con la API
-        // Por ejemplo:
-        // if (actionType === 'delete') {
-        //     axios.delete(`/api/players/${playerId}`)
-        //         .then(() => { /* actualizar lista */ })
-        //         .catch(error => { /* manejar error */ });
-        // }
-        // etc.
+    const fetchMatches = () => {
+        matchService.getAllMatches()
+            .then(res => setPropertiesData(res.data))
+            .catch(err => console.error('Error al obtener partidas:', err));
     };
 
-    // Cabeceras para la tabla de jugadores
+    const handlePlayerAction = (actionType, data) => {
+    const token = localStorage.getItem('token');
+    const config = { headers: { Authorization: `Bearer ${token}` } };
+    if (actionType === 'create') {
+        setShowModal(true);
+    }
+    if (actionType === 'update') {
+        matchService.updateMatch(data.match_id, data, config)
+            .then(fetchMatches)
+            .catch(() => alert('Error al actualizar partida'));
+    }
+    if (actionType === 'delete') {
+        matchService.deleteMatch(data.match_id, config)
+            .then(fetchMatches)
+            .catch(() => alert('Error al eliminar partida'));
+    }
+};
+
+    const handleModalClose = () => {
+        setShowModal(false);
+        setNewMatch({ mode: '' });
+    };
+
+    const handleModalSave = () => {
+    const token = localStorage.getItem('token');
+    const config = { headers: { Authorization: `Bearer ${token}` } };
+    matchService.createMatch(newMatch, config)
+        .then(() => {
+            fetchMatches();
+            handleModalClose();
+        })
+        .catch((err) => {
+            console.error('Error al crear partida:', err.response ? err.response.data : err.message);
+            alert('Error al crear partida');
+        });
+    };
+
     const playerHeaders = [
         { key: 'match_id', label: 'ID MATCH' },
         { key: 'mode', label: 'MODE' },
         { key: 'winner_id', label: 'WINNER' },
-        { key: 'create_at', label: 'CREATED' },
+        { key: 'created_at', label: 'CREATED' },
         { key: 'finished_at', label: 'FINISHED' },
         {
             key: 'acciones',
             label: 'ACCIONES',
-            // La función render recibe la fila completa (rowItem)
             render: (rowItem, handleShowUpdateModal, handleDelete, handleShowCreateModal, handleShowViewModal) => (
                 <div>
-                    {/* Botón para Crear (ejemplo, podría estar fuera de la tabla si es para toda la entidad) */}
-                    {/* Si el botón de crear es para toda la entidad (no para una fila específica),
-                        podrías ponerlo fuera de la tabla, por ejemplo, encima de ella.
-                        Lo dejo aquí como ejemplo de cómo podrías pasar handleShowCreateModal
-                        si tuvieras un botón de "Crear" por fila, lo cual es menos común.
-                        Para crear un nuevo jugador, normalmente tendrías un botón "Añadir Jugador"
-                        fuera de la tabla, que abre el modal de creación.
-                    */}
-                    {/* <Button variant="primary" size="sm" className="me-2" onClick={handleShowCreateModal}>
-                        Crear
-                    </Button> */}
-
-                    {/* Botón para Ver */}
                     <Button
-                        variant="primary" // O el color que prefieras (secondary, outline-primary, etc.)
+                        variant="primary"
                         size="sm"
                         className="me-2"
-                        onClick={() => handleShowViewModal(rowItem)} // Llama a la nueva función
-                        >
+                        onClick={() => handleShowViewModal(rowItem)}
+                    >
                         Ver
                     </Button>
-
-                    {/* Botón para Actualizar (abre el modal de actualización con los datos de la fila) */}
-                    <Button
+                    {/* <Button
                         variant="info"
                         size="sm"
                         className="me-2"
                         onClick={() => handleShowUpdateModal(rowItem)}
                     >
                         Actualizar
+                    </Button> */}
+                    <Button
+                        variant="info"
+                        size="sm"
+                        className="me-2"
+                        onClick={() => handleShowUpdateModal(rowItem)}
+                        >
+                        Actualizar
                     </Button>
-
-                    {/* Botón para Eliminar (llama directamente a la función de eliminación) */}
+                    {/* <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => handleDelete(rowItem.match_id)}
+                    >
+                        Eliminar
+                    </Button> */}
                     <Button
                         variant="danger"
                         size="sm"
-                        onClick={() => handleDelete(rowItem.player_id)}
-                    >
+                        onClick={() => handleDelete(rowItem)}
+                        >
                         Eliminar
                     </Button>
                 </div>
@@ -96,17 +112,43 @@ const MyDashboardPage = () => {
     return (
         <div>
             <h2 className="mb-4">Match</h2>
-            {/* Botón para crear un nuevo jugador (generalmente va fuera de la tabla) */}
             <Button variant="success" className="mb-3" onClick={() => handlePlayerAction('create', null)}>
                 Añadir Nueva Partida
             </Button>
             <RecentPropertiesList
                 headers={playerHeaders}
                 data={propertiesData}
-                onAction={handlePlayerAction} // Pasa la función para manejar acciones
+                onAction={handlePlayerAction}
             />
+
+            <Modal show={showModal} onHide={handleModalClose}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Crear Nueva Partida</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group>
+                            <Form.Label>Modo</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={newMatch.mode}
+                                onChange={e => setNewMatch({ ...newMatch, mode: e.target.value })}
+                                placeholder="Ej: PODER, HECHIZO, etc."
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleModalClose}>
+                        Cancelar
+                    </Button>
+                    <Button variant="primary" onClick={handleModalSave}>
+                        Crear
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };
 
-export default MyDashboardPage;
+export default Match;

@@ -1,9 +1,9 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3000/api/powers';
+const API_URL = 'http://localhost:3000/api';
 
-export const getAllPowers = () => axios.get(API_URL);
-export const getPowerById = (id) => axios.get(`${API_URL}/${id}`);
-export const createPower = (data) => axios.post(API_URL, data);
-export const updatePower = (id, data) => axios.put(`${API_URL}/${id}`, data);
-export const deletePower = (id) => axios.delete(`${API_URL}/${id}`);
+export const getAllPowers = () => axios.get(`${API_URL}/powers`);
+export const getPowerById = (id) => axios.get(`${API_URL}/power/${id}`);
+export const createPower = (data, config) => axios.post(`${API_URL}/power`, data, config);
+export const updatePower = (id, data, config) => axios.put(`${API_URL}/power/${id}`, data, config);
+export const deletePower = (id, config) => axios.delete(`${API_URL}/power/${id}`, config);

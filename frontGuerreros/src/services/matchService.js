@@ -6,7 +6,7 @@ const API_URL = 'http://localhost:3000/api';
 export const getAllMatches = () => axios.get(`${API_URL}/matches`);
 export const getMatchById = (id) => axios.get(`${API_URL}/match/${id}`);
 
-// Rutas solo admin
+// Rutas solo admin (requieren config con token)
 export const createMatch = (data, config) => axios.post(`${API_URL}/match`, data, config);
 export const updateMatch = (id, data, config) => axios.put(`${API_URL}/match/${id}`, data, config);
 export const deleteMatch = (id, config) => axios.delete(`${API_URL}/match/${id}`, config);

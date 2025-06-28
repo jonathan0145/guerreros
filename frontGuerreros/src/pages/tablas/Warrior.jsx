@@ -1,54 +1,83 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import RecentPropertiesList from '../../components/admin/RecentPropertiesList';
-import { Button } from 'react-bootstrap'; // Importa Button para los botones de acción
-
+import { Button, Modal, Form } from 'react-bootstrap';
+import * as warriorService from '../../services/warriorService';
 
 const Warrior = () => {
-    const propertiesData = [
-        {
-            warrior_id: 1,
-            player_id: 1,
-            name: "Guerrero uno",
-            type_id: 1,
-            race_id: 1,
-            total_power: 100,
-            total_magic: 100,
-            health: 100,
-            speed: 100,
-            intelligence: 100,
-            status: "active",
-        },
-        {
-            warrior_id: 2,
-            player_id: 2,
-            name: "Guerrero dos",
-            type_id: 2,
-            race_id: 2,
-            total_power: 200,
-            total_magic: 200,
-            health: 200,
-            speed: 200,
-            intelligence: 200,
-            status: "inactive",
-        },
-        // ... más datos de jugadores
-    ];
+    const [propertiesData, setPropertiesData] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [newWarrior, setNewWarrior] = useState({
+        player_id: '',
+        name: '',
+        type_id: '',
+        race_id: '',
+        total_power: '',
+        total_magic: '',
+        health: '',
+        speed: '',
+        intelligence: '',
+        status: ''
+    });
 
-    // Función para manejar las acciones (crear, actualizar, eliminar)
-    const handlePlayerAction = (actionType, playerId) => {
-        console.log(`Acción: ${actionType} para el jugador ID: ${playerId}`);
-        // Aquí iría la lógica real para interactuar con la API
-        // Por ejemplo:
-        // if (actionType === 'delete') {
-        //     axios.delete(`/api/players/${playerId}`)
-        //         .then(() => { /* actualizar lista */ })
-        //         .catch(error => { /* manejar error */ });
-        // }
-        // etc.
+    useEffect(() => {
+        fetchWarriors();
+    }, []);
+
+    const fetchWarriors = () => {
+        warriorService.getAllWarriors()
+            .then(res => setPropertiesData(res.data))
+            .catch(err => console.error('Error al obtener guerreros:', err));
     };
 
-    // Cabeceras para la tabla de jugadores
-    const playerHeaders = [
+    const handleWarriorAction = (actionType, data) => {
+        const token = localStorage.getItem('token');
+        const config = { headers: { Authorization: `Bearer ${token}` } };
+        if (actionType === 'create') {
+            setShowModal(true);
+        }
+        if (actionType === 'update') {
+            warriorService.updateWarrior(data.warrior_id, data, config)
+                .then(fetchWarriors)
+                .catch(() => alert('Error al actualizar guerrero'));
+        }
+        if (actionType === 'delete') {
+            warriorService.deleteWarrior(data.warrior_id, config)
+                .then(fetchWarriors)
+                .catch(() => alert('Error al eliminar guerrero'));
+        }
+    };
+
+    const handleModalClose = () => {
+        setShowModal(false);
+        setNewWarrior({
+            player_id: '',
+            name: '',
+            type_id: '',
+            race_id: '',
+            total_power: '',
+            total_magic: '',
+            health: '',
+            speed: '',
+            intelligence: '',
+            status: ''
+        });
+    };
+
+    const handleModalSave = () => {
+        const token = localStorage.getItem('token');
+        const config = { headers: { Authorization: `Bearer ${token}` } };
+        warriorService.createWarrior(newWarrior, config)
+            .then(() => {
+                fetchWarriors();
+                handleModalClose();
+            })
+            .catch((err) => {
+                console.error('Error al crear guerrero:', err.response ? err.response.data : err.message);
+                alert('Error al crear guerrero');
+            });
+    };
+
+    const warriorHeaders = [
         { key: 'warrior_id', label: 'ID WARRIOR' },
         { key: 'player_id', label: 'ID PLAYER' },
         { key: 'name', label: 'NAME' },
@@ -63,32 +92,16 @@ const Warrior = () => {
         {
             key: 'acciones',
             label: 'ACCIONES',
-            // La función render recibe la fila completa (rowItem)
             render: (rowItem, handleShowUpdateModal, handleDelete, handleShowCreateModal, handleShowViewModal) => (
                 <div>
-                    {/* Botón para Crear (ejemplo, podría estar fuera de la tabla si es para toda la entidad) */}
-                    {/* Si el botón de crear es para toda la entidad (no para una fila específica),
-                        podrías ponerlo fuera de la tabla, por ejemplo, encima de ella.
-                        Lo dejo aquí como ejemplo de cómo podrías pasar handleShowCreateModal
-                        si tuvieras un botón de "Crear" por fila, lo cual es menos común.
-                        Para crear un nuevo jugador, normalmente tendrías un botón "Añadir Jugador"
-                        fuera de la tabla, que abre el modal de creación.
-                    */}
-                    {/* <Button variant="primary" size="sm" className="me-2" onClick={handleShowCreateModal}>
-                        Crear
-                    </Button> */}
-
-                    {/* Botón para Ver */}
                     <Button
-                        variant="primary" // O el color que prefieras (secondary, outline-primary, etc.)
+                        variant="primary"
                         size="sm"
                         className="me-2"
-                        onClick={() => handleShowViewModal(rowItem)} // Llama a la nueva función
-                        >
+                        onClick={() => handleShowViewModal(rowItem)}
+                    >
                         Ver
                     </Button>
-
-                    {/* Botón para Actualizar (abre el modal de actualización con los datos de la fila) */}
                     <Button
                         variant="info"
                         size="sm"
@@ -97,12 +110,10 @@ const Warrior = () => {
                     >
                         Actualizar
                     </Button>
-
-                    {/* Botón para Eliminar (llama directamente a la función de eliminación) */}
                     <Button
                         variant="danger"
                         size="sm"
-                        onClick={() => handleDelete(rowItem.player_id)}
+                        onClick={() => handleDelete(rowItem)}
                     >
                         Eliminar
                     </Button>
@@ -114,15 +125,122 @@ const Warrior = () => {
     return (
         <div>
             <h2 className="mb-4">Warrior</h2>
-            {/* Botón para crear un nuevo jugador (generalmente va fuera de la tabla) */}
-            <Button variant="success" className="mb-3" onClick={() => handlePlayerAction('create', null)}>
+            <Button variant="success" className="mb-3" onClick={() => handleWarriorAction('create', null)}>
                 Añadir Nuevo Warrior
             </Button>
             <RecentPropertiesList
-                headers={playerHeaders}
+                headers={warriorHeaders}
                 data={propertiesData}
-                onAction={handlePlayerAction} // Pasa la función para manejar acciones
+                onAction={handleWarriorAction}
             />
+
+            <Modal show={showModal} onHide={handleModalClose}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Crear Nuevo Guerrero</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group>
+                            <Form.Label>ID Player</Form.Label>
+                            <Form.Control
+                                type="number"
+                                value={newWarrior.player_id}
+                                onChange={e => setNewWarrior({ ...newWarrior, player_id: e.target.value })}
+                                placeholder="ID del jugador"
+                            />
+                        </Form.Group>
+                        <Form.Group className="mt-2">
+                            <Form.Label>Nombre</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={newWarrior.name}
+                                onChange={e => setNewWarrior({ ...newWarrior, name: e.target.value })}
+                                placeholder="Nombre del guerrero"
+                            />
+                        </Form.Group>
+                        <Form.Group className="mt-2">
+                            <Form.Label>ID Type</Form.Label>
+                            <Form.Control
+                                type="number"
+                                value={newWarrior.type_id}
+                                onChange={e => setNewWarrior({ ...newWarrior, type_id: e.target.value })}
+                                placeholder="ID del tipo"
+                            />
+                        </Form.Group>
+                        <Form.Group className="mt-2">
+                            <Form.Label>ID Race</Form.Label>
+                            <Form.Control
+                                type="number"
+                                value={newWarrior.race_id}
+                                onChange={e => setNewWarrior({ ...newWarrior, race_id: e.target.value })}
+                                placeholder="ID de la raza"
+                            />
+                        </Form.Group>
+                        <Form.Group className="mt-2">
+                            <Form.Label>Total Power</Form.Label>
+                            <Form.Control
+                                type="number"
+                                value={newWarrior.total_power}
+                                onChange={e => setNewWarrior({ ...newWarrior, total_power: e.target.value })}
+                                placeholder="Poder total"
+                            />
+                        </Form.Group>
+                        <Form.Group className="mt-2">
+                            <Form.Label>Total Magic</Form.Label>
+                            <Form.Control
+                                type="number"
+                                value={newWarrior.total_magic}
+                                onChange={e => setNewWarrior({ ...newWarrior, total_magic: e.target.value })}
+                                placeholder="Magia total"
+                            />
+                        </Form.Group>
+                        <Form.Group className="mt-2">
+                            <Form.Label>Health</Form.Label>
+                            <Form.Control
+                                type="number"
+                                value={newWarrior.health}
+                                onChange={e => setNewWarrior({ ...newWarrior, health: e.target.value })}
+                                placeholder="Salud"
+                            />
+                        </Form.Group>
+                        <Form.Group className="mt-2">
+                            <Form.Label>Speed</Form.Label>
+                            <Form.Control
+                                type="number"
+                                value={newWarrior.speed}
+                                onChange={e => setNewWarrior({ ...newWarrior, speed: e.target.value })}
+                                placeholder="Velocidad"
+                            />
+                        </Form.Group>
+                        <Form.Group className="mt-2">
+                            <Form.Label>Intelligence</Form.Label>
+                            <Form.Control
+                                type="number"
+                                value={newWarrior.intelligence}
+                                onChange={e => setNewWarrior({ ...newWarrior, intelligence: e.target.value })}
+                                placeholder="Inteligencia"
+                            />
+                        </Form.Group>
+                        <Form.Group className="mt-2">
+                            <Form.Label>Status</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={newWarrior.status}
+                                onChange={e => setNewWarrior({ ...newWarrior, status: e.target.value })}
+                                placeholder="Estado"
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleModalClose}>
+                        Cancelar
+                    </Button>
+                    <Button variant="primary" onClick={handleModalSave}>
+                        Crear
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };

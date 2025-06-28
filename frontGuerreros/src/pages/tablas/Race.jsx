@@ -1,71 +1,77 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import RecentPropertiesList from '../../components/admin/RecentPropertiesList';
-import { Button } from 'react-bootstrap'; // Importa Button para los botones de acción
-
-
+import { Button, Modal, Form } from 'react-bootstrap';
+import * as raceService from '../../services/raceService';
 
 const Race = () => {
-    const propertiesData = [
-        {
-            race_id: 1,
-            name: "HUMANO",
-            description: "Los humanos son una raza versátil y adaptable, capaces de prosperar en una variedad de entornos. Su ingenio y determinación les permiten superar desafíos que otras razas podrían considerar insuperables.",
-        },
-        {
-            race_id: 2,
-            name: "ELFO",
-            description: "Los elfos son conocidos por su gracia y longevidad. Viven en armonía con la naturaleza y poseen habilidades mágicas innatas, lo que los convierte en poderosos aliados en la batalla.",
-        },
-        // ... más datos de jugadores
-    ];
+    const [propertiesData, setPropertiesData] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [newRace, setNewRace] = useState({ name: '', description: '' });
 
-    // Función para manejar las acciones (crear, actualizar, eliminar)
-    const handlePlayerAction = (actionType, playerId) => {
-        console.log(`Acción: ${actionType} para el jugador ID: ${playerId}`);
-        // Aquí iría la lógica real para interactuar con la API
-        // Por ejemplo:
-        // if (actionType === 'delete') {
-        //     axios.delete(`/api/players/${playerId}`)
-        //         .then(() => { /* actualizar lista */ })
-        //         .catch(error => { /* manejar error */ });
-        // }
-        // etc.
+    useEffect(() => {
+        fetchRaces();
+    }, []);
+
+    const fetchRaces = () => {
+        raceService.getAllRaces()
+            .then(res => setPropertiesData(res.data))
+            .catch(err => console.error('Error al obtener razas:', err));
     };
 
-    // Cabeceras para la tabla de jugadores
-    const playerHeaders = [
+    const handleRaceAction = (actionType, data) => {
+        const token = localStorage.getItem('token');
+        const config = { headers: { Authorization: `Bearer ${token}` } };
+        if (actionType === 'create') {
+            setShowModal(true);
+        }
+        if (actionType === 'update') {
+            raceService.updateRace(data.race_id, data, config)
+                .then(fetchRaces)
+                .catch(() => alert('Error al actualizar raza'));
+        }
+        if (actionType === 'delete') {
+            raceService.deleteRace(data.race_id, config)
+                .then(fetchRaces)
+                .catch(() => alert('Error al eliminar raza'));
+        }
+    };
+
+    const handleModalClose = () => {
+        setShowModal(false);
+        setNewRace({ name: '', description: '' });
+    };
+
+    const handleModalSave = () => {
+        const token = localStorage.getItem('token');
+        const config = { headers: { Authorization: `Bearer ${token}` } };
+        raceService.createRace(newRace, config)
+            .then(() => {
+                fetchRaces();
+                handleModalClose();
+            })
+            .catch((err) => {
+                console.error('Error al crear raza:', err.response ? err.response.data : err.message);
+                alert('Error al crear raza');
+            });
+    };
+
+    const raceHeaders = [
         { key: 'race_id', label: 'ID RACE' },
         { key: 'name', label: 'NAME' },
         { key: 'description', label: 'DESCRIPTION' },
         {
             key: 'acciones',
             label: 'ACCIONES',
-            // La función render recibe la fila completa (rowItem)
             render: (rowItem, handleShowUpdateModal, handleDelete, handleShowCreateModal, handleShowViewModal) => (
                 <div>
-                    {/* Botón para Crear (ejemplo, podría estar fuera de la tabla si es para toda la entidad) */}
-                    {/* Si el botón de crear es para toda la entidad (no para una fila específica),
-                        podrías ponerlo fuera de la tabla, por ejemplo, encima de ella.
-                        Lo dejo aquí como ejemplo de cómo podrías pasar handleShowCreateModal
-                        si tuvieras un botón de "Crear" por fila, lo cual es menos común.
-                        Para crear un nuevo jugador, normalmente tendrías un botón "Añadir Jugador"
-                        fuera de la tabla, que abre el modal de creación.
-                    */}
-                    {/* <Button variant="primary" size="sm" className="me-2" onClick={handleShowCreateModal}>
-                        Crear
-                    </Button> */}
-
-                    {/* Botón para Ver */}
                     <Button
-                        variant="primary" // O el color que prefieras (secondary, outline-primary, etc.)
+                        variant="primary"
                         size="sm"
                         className="me-2"
-                        onClick={() => handleShowViewModal(rowItem)} // Llama a la nueva función
-                        >
+                        onClick={() => handleShowViewModal(rowItem)}
+                    >
                         Ver
                     </Button>
-
-                    {/* Botón para Actualizar (abre el modal de actualización con los datos de la fila) */}
                     <Button
                         variant="info"
                         size="sm"
@@ -74,12 +80,10 @@ const Race = () => {
                     >
                         Actualizar
                     </Button>
-
-                    {/* Botón para Eliminar (llama directamente a la función de eliminación) */}
                     <Button
                         variant="danger"
                         size="sm"
-                        onClick={() => handleDelete(rowItem.player_id)}
+                        onClick={() => handleDelete(rowItem)}
                     >
                         Eliminar
                     </Button>
@@ -91,15 +95,51 @@ const Race = () => {
     return (
         <div>
             <h2 className="mb-4">Race</h2>
-            {/* Botón para crear un nuevo jugador (generalmente va fuera de la tabla) */}
-            <Button variant="success" className="mb-3" onClick={() => handlePlayerAction('create', null)}>
+            <Button variant="success" className="mb-3" onClick={() => handleRaceAction('create', null)}>
                 Añadir Nueva Raza
             </Button>
             <RecentPropertiesList
-                headers={playerHeaders}
+                headers={raceHeaders}
                 data={propertiesData}
-                onAction={handlePlayerAction} // Pasa la función para manejar acciones
+                onAction={handleRaceAction}
             />
+
+            <Modal show={showModal} onHide={handleModalClose}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Crear Nueva Raza</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group>
+                            <Form.Label>Nombre</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={newRace.name}
+                                onChange={e => setNewRace({ ...newRace, name: e.target.value })}
+                                placeholder="Nombre de la raza"
+                            />
+                        </Form.Group>
+                        <Form.Group className="mt-2">
+                            <Form.Label>Descripción</Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                rows={3}
+                                value={newRace.description}
+                                onChange={e => setNewRace({ ...newRace, description: e.target.value })}
+                                placeholder="Descripción de la raza"
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleModalClose}>
+                        Cancelar
+                    </Button>
+                    <Button variant="primary" onClick={handleModalSave}>
+                        Crear
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };

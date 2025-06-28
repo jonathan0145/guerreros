@@ -1,70 +1,77 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import RecentPropertiesList from '../../components/admin/RecentPropertiesList';
-import { Button } from 'react-bootstrap'; // Importa Button para los botones de acción
-
+import { Button, Modal, Form } from 'react-bootstrap';
+import * as warriortypeService from '../../services/warriortypeService';
 
 const Warriortype = () => {
-    const propertiesData = [
-        {
-            type_id: 1,
-            name: "Espadachin",
-            description: "Un guerrero experto en el uso de espadas, ágil y letal en combate cuerpo a cuerpo. Su habilidad con la espada le permite realizar ataques rápidos y precisos, dominando el arte del combate con filo."
-        },
-        {
-            type_id: 2,
-            name: "Arquero",
-            description: "Un maestro del arco y las flechas, capaz de atacar a sus enemigos desde la distancia con una puntería excepcional. Su agilidad y precisión le permiten moverse rápidamente por el campo de batalla, evitando ataques mientras dispara con eficacia."
-        },
-        // ... más datos de jugadores
-    ];
+    const [propertiesData, setPropertiesData] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [newType, setNewType] = useState({ name: '', description: '' });
 
-    // Función para manejar las acciones (crear, actualizar, eliminar)
-    const handlePlayerAction = (actionType, playerId) => {
-        console.log(`Acción: ${actionType} para el jugador ID: ${playerId}`);
-        // Aquí iría la lógica real para interactuar con la API
-        // Por ejemplo:
-        // if (actionType === 'delete') {
-        //     axios.delete(`/api/players/${playerId}`)
-        //         .then(() => { /* actualizar lista */ })
-        //         .catch(error => { /* manejar error */ });
-        // }
-        // etc.
+    useEffect(() => {
+        fetchTypes();
+    }, []);
+
+    const fetchTypes = () => {
+        warriortypeService.getAllWarriorTypes()
+            .then(res => setPropertiesData(res.data))
+            .catch(err => console.error('Error al obtener tipos:', err));
     };
 
-    // Cabeceras para la tabla de jugadores
-    const playerHeaders = [
+    const handleTypeAction = (actionType, data) => {
+        const token = localStorage.getItem('token');
+        const config = { headers: { Authorization: `Bearer ${token}` } };
+        if (actionType === 'create') {
+            setShowModal(true);
+        }
+        if (actionType === 'update') {
+            warriortypeService.updateWarriorType(data.type_id, data, config)
+                .then(fetchTypes)
+                .catch(() => alert('Error al actualizar tipo'));
+        }
+        if (actionType === 'delete') {
+            warriortypeService.deleteWarriorType(data.type_id, config)
+                .then(fetchTypes)
+                .catch(() => alert('Error al eliminar tipo'));
+        }
+    };
+
+    const handleModalClose = () => {
+        setShowModal(false);
+        setNewType({ name: '', description: '' });
+    };
+
+    const handleModalSave = () => {
+        const token = localStorage.getItem('token');
+        const config = { headers: { Authorization: `Bearer ${token}` } };
+        warriortypeService.createWarriorType(newType, config)
+            .then(() => {
+                fetchTypes();
+                handleModalClose();
+            })
+            .catch((err) => {
+                console.error('Error al crear tipo:', err.response ? err.response.data : err.message);
+                alert('Error al crear tipo');
+            });
+    };
+
+    const typeHeaders = [
         { key: 'type_id', label: 'ID TYPE' },
         { key: 'name', label: 'NAME' },
         { key: 'description', label: 'DESCRIPTION' },
         {
             key: 'acciones',
             label: 'ACCIONES',
-            // La función render recibe la fila completa (rowItem)
             render: (rowItem, handleShowUpdateModal, handleDelete, handleShowCreateModal, handleShowViewModal) => (
                 <div>
-                    {/* Botón para Crear (ejemplo, podría estar fuera de la tabla si es para toda la entidad) */}
-                    {/* Si el botón de crear es para toda la entidad (no para una fila específica),
-                        podrías ponerlo fuera de la tabla, por ejemplo, encima de ella.
-                        Lo dejo aquí como ejemplo de cómo podrías pasar handleShowCreateModal
-                        si tuvieras un botón de "Crear" por fila, lo cual es menos común.
-                        Para crear un nuevo jugador, normalmente tendrías un botón "Añadir Jugador"
-                        fuera de la tabla, que abre el modal de creación.
-                    */}
-                    {/* <Button variant="primary" size="sm" className="me-2" onClick={handleShowCreateModal}>
-                        Crear
-                    </Button> */}
-
-                    {/* Botón para Ver */}
                     <Button
-                        variant="primary" // O el color que prefieras (secondary, outline-primary, etc.)
+                        variant="primary"
                         size="sm"
                         className="me-2"
-                        onClick={() => handleShowViewModal(rowItem)} // Llama a la nueva función
-                        >
+                        onClick={() => handleShowViewModal(rowItem)}
+                    >
                         Ver
                     </Button>
-
-                    {/* Botón para Actualizar (abre el modal de actualización con los datos de la fila) */}
                     <Button
                         variant="info"
                         size="sm"
@@ -73,12 +80,10 @@ const Warriortype = () => {
                     >
                         Actualizar
                     </Button>
-
-                    {/* Botón para Eliminar (llama directamente a la función de eliminación) */}
                     <Button
                         variant="danger"
                         size="sm"
-                        onClick={() => handleDelete(rowItem.player_id)}
+                        onClick={() => handleDelete(rowItem)}
                     >
                         Eliminar
                     </Button>
@@ -90,15 +95,51 @@ const Warriortype = () => {
     return (
         <div>
             <h2 className="mb-4">Warrior Type</h2>
-            {/* Botón para crear un nuevo jugador (generalmente va fuera de la tabla) */}
-            <Button variant="success" className="mb-3" onClick={() => handlePlayerAction('create', null)}>
+            <Button variant="success" className="mb-3" onClick={() => handleTypeAction('create', null)}>
                 Añadir Nuevo Tipo de Guerrero
             </Button>
             <RecentPropertiesList
-                headers={playerHeaders}
+                headers={typeHeaders}
                 data={propertiesData}
-                onAction={handlePlayerAction} // Pasa la función para manejar acciones
+                onAction={handleTypeAction}
             />
+
+            <Modal show={showModal} onHide={handleModalClose}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Crear Nuevo Tipo de Guerrero</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group>
+                            <Form.Label>Nombre</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={newType.name}
+                                onChange={e => setNewType({ ...newType, name: e.target.value })}
+                                placeholder="Nombre del tipo"
+                            />
+                        </Form.Group>
+                        <Form.Group className="mt-2">
+                            <Form.Label>Descripción</Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                rows={3}
+                                value={newType.description}
+                                onChange={e => setNewType({ ...newType, description: e.target.value })}
+                                placeholder="Descripción del tipo"
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleModalClose}>
+                        Cancelar
+                    </Button>
+                    <Button variant="primary" onClick={handleModalSave}>
+                        Crear
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };

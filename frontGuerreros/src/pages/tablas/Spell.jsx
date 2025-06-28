@@ -1,40 +1,61 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import RecentPropertiesList from '../../components/admin/RecentPropertiesList';
-import { Button } from 'react-bootstrap'; // Importa Button para los botones de acción
-
+import { Button, Modal, Form } from 'react-bootstrap';
+import * as spellService from '../../services/spellService';
 
 const Spell = () => {
-    const propertiesData = [
-        {
-            spell_id: 1,
-            name: "Bola de fuego",
-            description: "Bola de fuego es algo que quema y da calor  y luz   pero debe tener muchas letras para que sea un poder importante y poderoso y que se pueda usar en muchas situaciones diferentes es algo que quema y da calor  y luz   pero debe tener muchas letras para que sea un poder importante y poderoso y que se pueda usar en muchas situaciones diferentes es algo que quema y da calor  y luz   pero debe tener muchas letras para que sea un poder importante y poderoso y que se pueda usar en muchas situaciones diferentes",
-            percentage: "80"
-        },
-        {
-            spell_id: 2,
-            name: "Bola de hielo",
-            description: "Bola de hielo",
-            percentage: "90"
-        },
-        // ... más datos de jugadores
-    ];
+    const [propertiesData, setPropertiesData] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [newSpell, setNewSpell] = useState({ name: '', description: '', percentage: '' });
 
-    // Función para manejar las acciones (crear, actualizar, eliminar)
-    const handlePlayerAction = (actionType, playerId) => {
-        console.log(`Acción: ${actionType} para el jugador ID: ${playerId}`);
-        // Aquí iría la lógica real para interactuar con la API
-        // Por ejemplo:
-        // if (actionType === 'delete') {
-        //     axios.delete(`/api/players/${playerId}`)
-        //         .then(() => { /* actualizar lista */ })
-        //         .catch(error => { /* manejar error */ });
-        // }
-        // etc.
+    useEffect(() => {
+        fetchSpells();
+    }, []);
+
+    const fetchSpells = () => {
+        spellService.getAllSpells()
+            .then(res => setPropertiesData(res.data))
+            .catch(err => console.error('Error al obtener hechizos:', err));
     };
 
-    // Cabeceras para la tabla de jugadores
-    const playerHeaders = [
+    const handleSpellAction = (actionType, data) => {
+        const token = localStorage.getItem('token');
+        const config = { headers: { Authorization: `Bearer ${token}` } };
+        if (actionType === 'create') {
+            setShowModal(true);
+        }
+        if (actionType === 'update') {
+            spellService.updateSpell(data.spell_id, data, config)
+                .then(fetchSpells)
+                .catch(() => alert('Error al actualizar hechizo'));
+        }
+        if (actionType === 'delete') {
+            spellService.deleteSpell(data.spell_id, config)
+                .then(fetchSpells)
+                .catch(() => alert('Error al eliminar hechizo'));
+        }
+    };
+
+    const handleModalClose = () => {
+        setShowModal(false);
+        setNewSpell({ name: '', description: '', percentage: '' });
+    };
+
+    const handleModalSave = () => {
+        const token = localStorage.getItem('token');
+        const config = { headers: { Authorization: `Bearer ${token}` } };
+        spellService.createSpell(newSpell, config)
+            .then(() => {
+                fetchSpells();
+                handleModalClose();
+            })
+            .catch((err) => {
+                console.error('Error al crear hechizo:', err.response ? err.response.data : err.message);
+                alert('Error al crear hechizo');
+            });
+    };
+
+    const spellHeaders = [
         { key: 'spell_id', label: 'ID SPELL' },
         { key: 'name', label: 'NAME' },
         { key: 'description', label: 'DESCRIPTION' },
@@ -42,32 +63,16 @@ const Spell = () => {
         {
             key: 'acciones',
             label: 'ACCIONES',
-            // La función render recibe la fila completa (rowItem)
             render: (rowItem, handleShowUpdateModal, handleDelete, handleShowCreateModal, handleShowViewModal) => (
                 <div>
-                    {/* Botón para Crear (ejemplo, podría estar fuera de la tabla si es para toda la entidad) */}
-                    {/* Si el botón de crear es para toda la entidad (no para una fila específica),
-                        podrías ponerlo fuera de la tabla, por ejemplo, encima de ella.
-                        Lo dejo aquí como ejemplo de cómo podrías pasar handleShowCreateModal
-                        si tuvieras un botón de "Crear" por fila, lo cual es menos común.
-                        Para crear un nuevo jugador, normalmente tendrías un botón "Añadir Jugador"
-                        fuera de la tabla, que abre el modal de creación.
-                    */}
-                    {/* <Button variant="primary" size="sm" className="me-2" onClick={handleShowCreateModal}>
-                        Crear
-                    </Button> */}
-
-                    {/* Botón para Ver */}
                     <Button
-                        variant="primary" // O el color que prefieras (secondary, outline-primary, etc.)
+                        variant="primary"
                         size="sm"
                         className="me-2"
-                        onClick={() => handleShowViewModal(rowItem)} // Llama a la nueva función
-                        >
+                        onClick={() => handleShowViewModal(rowItem)}
+                    >
                         Ver
                     </Button>
-
-                    {/* Botón para Actualizar (abre el modal de actualización con los datos de la fila) */}
                     <Button
                         variant="info"
                         size="sm"
@@ -76,12 +81,10 @@ const Spell = () => {
                     >
                         Actualizar
                     </Button>
-
-                    {/* Botón para Eliminar (llama directamente a la función de eliminación) */}
                     <Button
                         variant="danger"
                         size="sm"
-                        onClick={() => handleDelete(rowItem.player_id)}
+                        onClick={() => handleDelete(rowItem)}
                     >
                         Eliminar
                     </Button>
@@ -93,15 +96,60 @@ const Spell = () => {
     return (
         <div>
             <h2 className="mb-4">Spell</h2>
-            {/* Botón para crear un nuevo jugador (generalmente va fuera de la tabla) */}
-            <Button variant="success" className="mb-3" onClick={() => handlePlayerAction('create', null)}>
+            <Button variant="success" className="mb-3" onClick={() => handleSpellAction('create', null)}>
                 Añadir Nuevo Hechizo
             </Button>
             <RecentPropertiesList
-                headers={playerHeaders}
+                headers={spellHeaders}
                 data={propertiesData}
-                onAction={handlePlayerAction} // Pasa la función para manejar acciones
+                onAction={handleSpellAction}
             />
+
+            <Modal show={showModal} onHide={handleModalClose}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Crear Nuevo Hechizo</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group>
+                            <Form.Label>Nombre</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={newSpell.name}
+                                onChange={e => setNewSpell({ ...newSpell, name: e.target.value })}
+                                placeholder="Nombre del hechizo"
+                            />
+                        </Form.Group>
+                        <Form.Group className="mt-2">
+                            <Form.Label>Descripción</Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                rows={3}
+                                value={newSpell.description}
+                                onChange={e => setNewSpell({ ...newSpell, description: e.target.value })}
+                                placeholder="Descripción del hechizo"
+                            />
+                        </Form.Group>
+                        <Form.Group className="mt-2">
+                            <Form.Label>Porcentaje</Form.Label>
+                            <Form.Control
+                                type="number"
+                                value={newSpell.percentage}
+                                onChange={e => setNewSpell({ ...newSpell, percentage: e.target.value })}
+                                placeholder="Porcentaje"
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleModalClose}>
+                        Cancelar
+                    </Button>
+                    <Button variant="primary" onClick={handleModalSave}>
+                        Crear
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };

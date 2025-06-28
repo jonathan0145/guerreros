@@ -1,101 +1,92 @@
-import React from 'react';
-import RecentPropertiesList from '../../components/admin/RecentPropertiesList';
-import { Button } from 'react-bootstrap'; // Importa Button para los botones de acción
-
+import React, { useState } from 'react';
+import { Button, Modal, Form } from 'react-bootstrap';
+import * as warriorService from '../../services/warriorService';
 
 const MatchWarrior = () => {
-    const propertiesData = [
-        {
-            match_id: 1,
-            warrior_id:1
-        },
-        {
-            match_id: 2,
-            warrior_id:1
-        },
-        // ... más datos de jugadores
-    ];
+    const [showModal, setShowModal] = useState(false);
+    const [modalType, setModalType] = useState('create'); // 'create' o 'delete'
+    const [relation, setRelation] = useState({ match_id: '', warrior_id: '' });
 
-    // Función para manejar las acciones (crear, actualizar, eliminar)
-    const handlePlayerAction = (actionType, playerId) => {
-        console.log(`Acción: ${actionType} para el jugador ID: ${playerId}`);
-        // Aquí iría la lógica real para interactuar con la API
-        // Por ejemplo:
-        // if (actionType === 'delete') {
-        //     axios.delete(`/api/players/${playerId}`)
-        //         .then(() => { /* actualizar lista */ })
-        //         .catch(error => { /* manejar error */ });
-        // }
-        // etc.
+    const handleShowModal = (type) => {
+        setModalType(type);
+        setShowModal(true);
     };
 
-    // Cabeceras para la tabla de jugadores
-    const playerHeaders = [
-        { key: 'match_id', label: 'ID MATCH' },
-        { key: 'warrior_id', label: 'ID WARRIOR' },
-        {
-            key: 'acciones',
-            label: 'ACCIONES',
-            // La función render recibe la fila completa (rowItem)
-            render: (rowItem, handleShowUpdateModal, handleDelete, handleShowCreateModal, handleShowViewModal) => (
-                <div>
-                    {/* Botón para Crear (ejemplo, podría estar fuera de la tabla si es para toda la entidad) */}
-                    {/* Si el botón de crear es para toda la entidad (no para una fila específica),
-                        podrías ponerlo fuera de la tabla, por ejemplo, encima de ella.
-                        Lo dejo aquí como ejemplo de cómo podrías pasar handleShowCreateModal
-                        si tuvieras un botón de "Crear" por fila, lo cual es menos común.
-                        Para crear un nuevo jugador, normalmente tendrías un botón "Añadir Jugador"
-                        fuera de la tabla, que abre el modal de creación.
-                    */}
-                    {/* <Button variant="primary" size="sm" className="me-2" onClick={handleShowCreateModal}>
-                        Crear
-                    </Button> */}
+    const handleModalClose = () => {
+        setShowModal(false);
+        setRelation({ match_id: '', warrior_id: '' });
+    };
 
-                    {/* Botón para Ver */}
-                    <Button
-                        variant="primary" // O el color que prefieras (secondary, outline-primary, etc.)
-                        size="sm"
-                        className="me-2"
-                        onClick={() => handleShowViewModal(rowItem)} // Llama a la nueva función
-                        >
-                        Ver
-                    </Button>
-
-                    {/* Botón para Actualizar (abre el modal de actualización con los datos de la fila) */}
-                    <Button
-                        variant="info"
-                        size="sm"
-                        className="me-2"
-                        onClick={() => handleShowUpdateModal(rowItem)}
-                    >
-                        Actualizar
-                    </Button>
-
-                    {/* Botón para Eliminar (llama directamente a la función de eliminación) */}
-                    <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={() => handleDelete(rowItem.player_id)}
-                    >
-                        Eliminar
-                    </Button>
-                </div>
-            )
+    const handleModalAction = () => {
+        const token = localStorage.getItem('token');
+        const config = { headers: { Authorization: `Bearer ${token}` } };
+        if (modalType === 'create') {
+            warriorService.addWarriorToMatch(relation.match_id, relation.warrior_id, config)
+                .then(() => {
+                    handleModalClose();
+                    alert('Guerrero añadido a la partida');
+                })
+                .catch(() => alert('Error al agregar relación'));
+        } else {
+            warriorService.removeWarriorFromMatch(relation.match_id, relation.warrior_id, config)
+                .then(() => {
+                    handleModalClose();
+                    alert('Guerrero eliminado de la partida');
+                })
+                .catch(() => alert('Error al eliminar relación'));
         }
-    ];
+    };
 
     return (
         <div>
             <h2 className="mb-4">Match Warrior</h2>
-            {/* Botón para crear un nuevo jugador (generalmente va fuera de la tabla) */}
-            <Button variant="success" className="mb-3" onClick={() => handlePlayerAction('create', null)}>
-                Añadir Nuevo Guerrero a Partida
+            <Button variant="success" className="mb-3 me-2" onClick={() => handleShowModal('create')}>
+                Añadir Guerrero a Partida
             </Button>
-            <RecentPropertiesList
-                headers={playerHeaders}
-                data={propertiesData}
-                onAction={handlePlayerAction} // Pasa la función para manejar acciones
-            />
+            <Button variant="danger" className="mb-3" onClick={() => handleShowModal('delete')}>
+                Eliminar Guerrero de Partida
+            </Button>
+
+            <Modal show={showModal} onHide={handleModalClose}>
+                <Modal.Header closeButton>
+                    <Modal.Title>
+                        {modalType === 'create' ? 'Añadir Guerrero a Partida' : 'Eliminar Guerrero de Partida'}
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group>
+                            <Form.Label>ID Match</Form.Label>
+                            <Form.Control
+                                type="number"
+                                value={relation.match_id}
+                                onChange={e => setRelation({ ...relation, match_id: e.target.value })}
+                                placeholder="ID de la partida"
+                            />
+                        </Form.Group>
+                        <Form.Group className="mt-2">
+                            <Form.Label>ID Guerrero</Form.Label>
+                            <Form.Control
+                                type="number"
+                                value={relation.warrior_id}
+                                onChange={e => setRelation({ ...relation, warrior_id: e.target.value })}
+                                placeholder="ID del guerrero"
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleModalClose}>
+                        Cancelar
+                    </Button>
+                    <Button
+                        variant={modalType === 'create' ? 'primary' : 'danger'}
+                        onClick={handleModalAction}
+                    >
+                        {modalType === 'create' ? 'Crear' : 'Eliminar'}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };

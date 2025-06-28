@@ -101,7 +101,7 @@ async function addPowerToWarrior(req, res) {
 // Eliminar un poder de un guerrero
 async function removePowerFromWarrior(req, res) {
   try {
-    const { warriorId, powerId } = req.body;
+    const { warriorId, powerId } = req.params;
     const warrior = await Warrior.findByPk(warriorId);
     const power = await Power.findByPk(powerId);
 
@@ -160,7 +160,7 @@ async function addSpellToWarrior(req, res) {
 // Eliminar un hechizo de un guerrero
 async function removeSpellFromWarrior(req, res) {
   try {
-    const { warriorId, spellId } = req.body;
+    const { warriorId, spellId } = req.params;
     const warrior = await Warrior.findByPk(warriorId);
     const spell = await Spell.findByPk(spellId);
 
@@ -214,7 +214,7 @@ async function addWarriorToMatch(req, res) {
 // Eliminar un guerrero de un partido
 async function removeWarriorFromMatch(req, res) {
   try {
-    const { matchId, warriorId } = req.body;
+    const { matchId, warriorId } = req.params;
     const matchWarrior = await MatchWarrior.destroy({ where: { match_id: matchId, warrior_id: warriorId } });
 
     if (matchWarrior) {

@@ -1,3 +1,4 @@
+const cors = require('cors');
 const express = require('express');
 const apiUserRoutes = require('./routes/apiUserRoutes');
 const playerRoutes = require('./routes/playerRoutes');
@@ -12,6 +13,8 @@ const warriorTypeRoutes = require('./routes/warriorTypeRoutes');
 const sequelize = require('../config/database');
 
 const app = express();
+
+app.use(cors());
 
 app.use(express.json());
 app.use('/api', apiUserRoutes);

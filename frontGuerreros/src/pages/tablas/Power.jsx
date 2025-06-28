@@ -1,73 +1,78 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import RecentPropertiesList from '../../components/admin/RecentPropertiesList';
-import { Button } from 'react-bootstrap'; // Importa Button para los botones de acción
-
+import { Button, Modal, Form } from 'react-bootstrap';
+import * as powerService from '../../services/powerService';
 
 const Power = () => {
-    const propertiesData = [
-        {
-            spell_id: 1,
-            name: "FUEGO",
-            description: "es algo que quema y da calor  y luz   pero debe tener muchas letras para que sea un poder importante y poderoso y que se pueda usar en muchas situaciones diferentes es algo que quema y da calor  y luz   pero debe tener muchas letras para que sea un poder importante y poderoso y que se pueda usar en muchas situaciones diferentes es algo que quema y da calor  y luz   pero debe tener muchas letras para que sea un poder importante y poderoso y que se pueda usar en muchas situaciones diferentes",
-            percentage: "80"
-        },
-        {
-            spell_id: 2,
-            name: "Hielo",
-            description: "Hielo que congela y enfría todo a su alrededor, útil para detener enemigos o crear barreras",
-            percentage: "90"
-        },
-        // ... más datos de jugadores
-    ];
+    const [propertiesData, setPropertiesData] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [newPower, setNewPower] = useState({ name: '', description: '', percentage: '' });
 
-    // Función para manejar las acciones (crear, actualizar, eliminar)
-    const handlePlayerAction = (actionType, playerId) => {
-        console.log(`Acción: ${actionType} para el jugador ID: ${playerId}`);
-        // Aquí iría la lógica real para interactuar con la API
-        // Por ejemplo:
-        // if (actionType === 'delete') {
-        //     axios.delete(`/api/players/${playerId}`)
-        //         .then(() => { /* actualizar lista */ })
-        //         .catch(error => { /* manejar error */ });
-        // }
-        // etc.
+    useEffect(() => {
+        fetchPowers();
+    }, []);
+
+    const fetchPowers = () => {
+        powerService.getAllPowers()
+            .then(res => setPropertiesData(res.data))
+            .catch(err => console.error('Error al obtener poderes:', err));
     };
 
-    // Cabeceras para la tabla de jugadores
-    const playerHeaders = [
-        { key: 'spell_id', label: 'ID POWER' },
+    const handlePowerAction = (actionType, data) => {
+        const token = localStorage.getItem('token');
+        const config = { headers: { Authorization: `Bearer ${token}` } };
+        if (actionType === 'create') {
+            setShowModal(true);
+        }
+        if (actionType === 'update') {
+            powerService.updatePower(data.power_id, data, config)
+                .then(fetchPowers)
+                .catch(() => alert('Error al actualizar poder'));
+        }
+        if (actionType === 'delete') {
+            powerService.deletePower(data.power_id, config)
+                .then(fetchPowers)
+                .catch(() => alert('Error al eliminar poder'));
+        }
+    };
+
+    const handleModalClose = () => {
+        setShowModal(false);
+        setNewPower({ name: '', description: '', percentage: '' });
+    };
+
+    const handleModalSave = () => {
+        const token = localStorage.getItem('token');
+        const config = { headers: { Authorization: `Bearer ${token}` } };
+        powerService.createPower(newPower, config)
+            .then(() => {
+                fetchPowers();
+                handleModalClose();
+            })
+            .catch((err) => {
+                console.error('Error al crear poder:', err.response ? err.response.data : err.message);
+                alert('Error al crear poder');
+            });
+    };
+
+    const powerHeaders = [
+        { key: 'power_id', label: 'ID POWER' },
         { key: 'name', label: 'NAME' },
         { key: 'description', label: 'DESCRIPTION' },
         { key: 'percentage', label: 'PERCENTAGE' },
         {
             key: 'acciones',
             label: 'ACCIONES',
-            // La función render recibe la fila completa (rowItem)
             render: (rowItem, handleShowUpdateModal, handleDelete, handleShowCreateModal, handleShowViewModal) => (
                 <div>
-                    {/* Botón para Crear (ejemplo, podría estar fuera de la tabla si es para toda la entidad) */}
-                    {/* Si el botón de crear es para toda la entidad (no para una fila específica),
-                        podrías ponerlo fuera de la tabla, por ejemplo, encima de ella.
-                        Lo dejo aquí como ejemplo de cómo podrías pasar handleShowCreateModal
-                        si tuvieras un botón de "Crear" por fila, lo cual es menos común.
-                        Para crear un nuevo jugador, normalmente tendrías un botón "Añadir Jugador"
-                        fuera de la tabla, que abre el modal de creación.
-                    */}
-                    {/* <Button variant="primary" size="sm" className="me-2" onClick={handleShowCreateModal}>
-                        Crear
-                    </Button> */}
-
-                    {/* Botón para Ver */}
                     <Button
-                        variant="primary" // O el color que prefieras (secondary, outline-primary, etc.)
+                        variant="primary"
                         size="sm"
                         className="me-2"
-                        onClick={() => handleShowViewModal(rowItem)} // Llama a la nueva función
-                        >
+                        onClick={() => handleShowViewModal(rowItem)}
+                    >
                         Ver
                     </Button>
-
-                    {/* Botón para Actualizar (abre el modal de actualización con los datos de la fila) */}
                     <Button
                         variant="info"
                         size="sm"
@@ -76,12 +81,10 @@ const Power = () => {
                     >
                         Actualizar
                     </Button>
-
-                    {/* Botón para Eliminar (llama directamente a la función de eliminación) */}
                     <Button
                         variant="danger"
                         size="sm"
-                        onClick={() => handleDelete(rowItem.player_id)}
+                        onClick={() => handleDelete(rowItem)}
                     >
                         Eliminar
                     </Button>
@@ -93,15 +96,60 @@ const Power = () => {
     return (
         <div>
             <h2 className="mb-4">Power</h2>
-            {/* Botón para crear un nuevo jugador (generalmente va fuera de la tabla) */}
-            <Button variant="success" className="mb-3" onClick={() => handlePlayerAction('create', null)}>
+            <Button variant="success" className="mb-3" onClick={() => handlePowerAction('create', null)}>
                 Añadir Nuevo Poder
             </Button>
             <RecentPropertiesList
-                headers={playerHeaders}
+                headers={powerHeaders}
                 data={propertiesData}
-                onAction={handlePlayerAction} // Pasa la función para manejar acciones
+                onAction={handlePowerAction}
             />
+
+            <Modal show={showModal} onHide={handleModalClose}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Crear Nuevo Poder</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group>
+                            <Form.Label>Nombre</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={newPower.name}
+                                onChange={e => setNewPower({ ...newPower, name: e.target.value })}
+                                placeholder="Nombre del poder"
+                            />
+                        </Form.Group>
+                        <Form.Group className="mt-2">
+                            <Form.Label>Descripción</Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                rows={3}
+                                value={newPower.description}
+                                onChange={e => setNewPower({ ...newPower, description: e.target.value })}
+                                placeholder="Descripción del poder"
+                            />
+                        </Form.Group>
+                        <Form.Group className="mt-2">
+                            <Form.Label>Porcentaje</Form.Label>
+                            <Form.Control
+                                type="number"
+                                value={newPower.percentage}
+                                onChange={e => setNewPower({ ...newPower, percentage: e.target.value })}
+                                placeholder="Porcentaje"
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleModalClose}>
+                        Cancelar
+                    </Button>
+                    <Button variant="primary" onClick={handleModalSave}>
+                        Crear
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };

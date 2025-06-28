@@ -591,55 +591,6 @@ async function playMatch(req, res) {
   }
 }
 
-// // Finalizar un partido y actualizar estadísticas de jugadores
-// async function finishMatch(req, res) {
-//   try {
-//     const { matchId } = req.params;
-//     const match = await Match.findByPk(matchId);
-
-//     if (!match) {
-//       return res.status(404).json({ message: 'Partido no encontrado.' });
-//     }
-
-//     if (!match.winner_id) {
-//       return res.status(400).json({ message: 'El partido no tiene un ganador asignado para finalizar.' });
-//     }
-
-//     // Registrar el resultado de la partida
-//     await match.update({ status: 'finalizado' });
-
-//     // Actualizar las victorias del jugador ganador
-//     const winner = await PlayerStat.findOne({ where: { player_id: match.winner_id } });
-//     if (winner) {
-//       winner.victories += 1;
-//       winner.games_played += 1; // Incrementar partidas jugadas
-//       await winner.save();
-
-//       // Actualizar el score en el ranking
-//       const ranking = await Ranking.findOne({ where: { player_id: match.winner_id } });
-//       if (ranking) {
-//         ranking.score = winner.victories;
-//         await ranking.save();
-//       }
-//     }
-
-//     // Actualizar las estadísticas de los jugadores perdedores
-//     const losingPlayers = await MatchPlayer.findAll({ where: { match_id: matchId, player_id: { [Op.ne]: match.winner_id } } });
-//     for (const player of losingPlayers) {
-//       const loserStat = await PlayerStat.findOne({ where: { player_id: player.player_id } });
-//       if (loserStat) {
-//         loserStat.defeats += 1;
-//         loserStat.games_played += 1; // Incrementar partidas jugadas
-//         await loserStat.save();
-//       }
-//     }
-
-//     res.status(200).json({ message: 'Partida finalizada', match });
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// }
-
 // Finalizar un partido y actualizar estadísticas de jugadores
 async function finishMatch(req, res) {
   try {

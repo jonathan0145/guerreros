@@ -21,6 +21,15 @@ import Race from './pages/tablas/Race';
 import WarriorType from './pages/tablas/WarriorType';
 import Ranking from './pages/tablas/Ranking';
 
+//* imports de juego
+import Lobby from './pages/Lobby';
+import SelectCardsPage from './pages/SelectCardPage';
+
+function RequireUserRole({ children }) {
+  const role = localStorage.getItem('role');
+  return role === 'user' ? children : <Navigate to="/login" />;
+}
+
 function App() {
   return (
     <div className="container1">
@@ -28,6 +37,18 @@ function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+
+          {/* Ruta protegida para Lobby */}
+          <Route
+            path="/lobby"
+            element={
+              <RequireUserRole>
+                <Lobby />
+              </RequireUserRole>
+            }
+          />
+
+          <Route path="/match/:matchId/select-cards" element={<SelectCardsPage />} />
 
           <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Match />} />

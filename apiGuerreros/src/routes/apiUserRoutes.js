@@ -9,7 +9,6 @@ const {
   remove
 } = require('../controllers/apiUserController');
 const { verifyRole } = require('../middleware/verifyRole.js');
-const includeToken = require('../middleware/includeToken');
 
 const router = express.Router();
 

@@ -7,6 +7,7 @@ const {
   deleteWarriorType
 } = require('../controllers/warriorTypeController');
 const { verifyRole } = require('../middleware/verifyRole.js');
+const { verifyPlayerRole } = require('../middleware/verifyPlayerRole.js');
 
 const router = express.Router();
 

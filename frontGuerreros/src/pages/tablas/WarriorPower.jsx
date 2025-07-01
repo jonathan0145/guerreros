@@ -20,20 +20,27 @@ const WarriorPower = () => {
     const handleModalAction = () => {
         const token = localStorage.getItem('token');
         const config = { headers: { Authorization: `Bearer ${token}` } };
+        console.log('Añadiendo poder:', relation); // <-- Agrega esto
         if (modalType === 'create') {
             warriorService.addPowerToWarrior(relation.warrior_id, relation.power_id, config)
                 .then(() => {
                     handleModalClose();
                     alert('Poder añadido al guerrero');
                 })
-                .catch(() => alert('Error al agregar poder'));
+                .catch(err => {
+                    console.log('Error:', err.response?.data || err.message); // <-- Agrega esto
+                    alert('Error al agregar poder');
+                });
         } else {
             warriorService.removePowerFromWarrior(relation.warrior_id, relation.power_id, config)
                 .then(() => {
                     handleModalClose();
                     alert('Poder eliminado del guerrero');
                 })
-                .catch(() => alert('Error al eliminar poder'));
+                .catch(err => {
+                    console.log('Error:', err.response?.data || err.message); // <-- Agrega esto
+                    alert('Error al eliminar poder');
+                });
         }
     };
 

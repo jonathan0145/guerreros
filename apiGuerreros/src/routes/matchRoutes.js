@@ -10,6 +10,7 @@ const {
   selectWarriorsForMatch,
   playMatch,
   finishMatch,
+  getMatchByPlayerId
 } = require('../controllers/matchController');
 const { verifyRole } = require('../middleware/verifyRole.js');
 const { verifyPlayerRole } = require('../middleware/verifyPlayerRole.js');
@@ -29,8 +30,8 @@ router.delete('/match/:id', verifyRole('admin'), verifyPlayerRole('admin'), dele
 // Routes for service role
 router.post('/match/:matchId/player/:playerId', verifyRole('admin', 'service'), verifyPlayerRole('admin', 'user'), addPlayerToMatch);
 router.delete('/match/:matchId/player/:playerId', verifyRole('admin', 'service'), verifyPlayerRole('admin', 'user'), removePlayerFromMatch);
-router.post('/select-warriors', verifyRole('admin', 'service'), verifyPlayerRole('admin', 'user'), selectWarriorsForMatch);
+router.post('/select-warriors', verifyRole('admin', 'service', 'user'), verifyPlayerRole('admin', 'user'), selectWarriorsForMatch);
 router.post('/match/:matchId/play', verifyRole('admin', 'service'), verifyPlayerRole('admin', 'user'), playMatch);
 router.put('/match/:matchId/finish', verifyRole('admin', 'service'), verifyPlayerRole('admin', 'user'), finishMatch);
-
+router.get('/match/player/:playerId', verifyRole('admin', 'service', 'user'), verifyPlayerRole('admin', 'user'), getMatchByPlayerId);
 module.exports = router;

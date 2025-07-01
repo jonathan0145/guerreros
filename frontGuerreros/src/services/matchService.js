@@ -26,3 +26,6 @@ export const playMatch = (matchId, data, config) =>
 
 export const finishMatch = (matchId, data, config) =>
   axios.put(`${API_URL}/match/${matchId}/finish`, data, config);
+
+export const getMatchByPlayerId = (playerId, config) =>
+  axios.get(`${API_URL}/match/player/${playerId}`, config);

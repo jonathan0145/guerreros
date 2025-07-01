@@ -7,6 +7,7 @@ const {
   deleteSpell
 } = require('../controllers/spellController');
 const { verifyRole } = require('../middleware/verifyRole.js');
+const { verifyPlayerRole } = require('../middleware/verifyPlayerRole.js');
 
 const router = express.Router();
 

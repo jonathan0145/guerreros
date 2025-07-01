@@ -14,6 +14,19 @@ async function register(req, res) {
   res.status(201).json({ message: 'Usuario creado', player_id: player.player_id });
 }
 
+// // Login para ambos roles
+// async function login(req, res) {
+//   const { username, password } = req.body;
+//   const player = await Player.findOne({ where: { username } });
+//   if (!player) return res.status(401).json({ message: 'Credenciales inválidas' });
+
+//   const valid = await bcrypt.compare(password, player.password_hash);
+//   if (!valid) return res.status(401).json({ message: 'Credenciales inválidas' });
+
+//   const token = jwt.sign({ player_id: player.player_id, role: player.role }, 'secreto', { expiresIn: '1h' });
+//   res.json({ token, role: player.role });
+// }
+
 // Login para ambos roles
 async function login(req, res) {
   const { username, password } = req.body;
@@ -24,7 +37,7 @@ async function login(req, res) {
   if (!valid) return res.status(401).json({ message: 'Credenciales inválidas' });
 
   const token = jwt.sign({ player_id: player.player_id, role: player.role }, 'secreto', { expiresIn: '1h' });
-  res.json({ token, role: player.role });
+  res.json({ token, role: player.role, player_id: player.player_id }); // <-- Añade player_id aquí
 }
 
 // CRUD solo para admin
